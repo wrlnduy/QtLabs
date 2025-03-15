@@ -5,6 +5,7 @@
 #include <QHBoxLayout>
 #include <QJsonArray>
 #include <QJsonObject>
+#include <QScrollArea>
 #include <QString>
 #include <utility>
 
@@ -47,12 +48,20 @@ RanobeView::RanobeView(
 
     auto* synopsis = new QLabel(titleInfo["synopsis"].toString() + QString("\n"));
     synopsis->setWordWrap(true);
+    synopsis->setContentsMargins(0, 0, 0, 0);
+
+    synopsisScrollable_ = new QScrollArea;
+    synopsisScrollable_->setWidget(synopsis);
+    synopsisScrollable_->setWidgetResizable(true);
+    synopsisScrollable_->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
 
     auto* chaptersLabel = new QLabel(QString("Главы\n"));
     chaptersLabel->setStyleSheet("font-weight: bold; color: orange");
 
+    chaptersLayout->setContentsMargins(2, 2, 2, 2);
+
     chaptersLayout->addWidget(synopsisLabel);
-    chaptersLayout->addWidget(synopsis);
+    chaptersLayout->addWidget(synopsisScrollable_);
     chaptersLayout->addWidget(chaptersLabel);
     chaptersLayout->addWidget(chapterList_);
 

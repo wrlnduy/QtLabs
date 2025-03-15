@@ -11,6 +11,7 @@
 #include <QLayout>
 #include <QMainWindow>
 #include <QResizeEvent>
+#include <QScrollArea>
 #include <QStackedWidget>
 #include <QString>
 
@@ -32,9 +33,9 @@ class RanobeReader : public QMainWindow {
 
     void setChapterView(const QString& titleName, const int& chapterIndex);
 
-    void setRanobeListLayout();
+    void setRanobeList();
 
-    void setRanobeViewLayout(const QString& titleName);
+    void setRanobeView(const QString& titleName);
 
    protected:
     void resizeEvent(QResizeEvent* event) override;
@@ -45,6 +46,8 @@ class RanobeReader : public QMainWindow {
     RanobeList* ranobeList_{};
     RanobeView* ranobeView_{};
     ChapterView* chapterView_{};
+
+    QScrollArea* ranobeScrollList_{};
 
     LayoutType currentLayout = LayoutType::EmptyLayout;
     QJsonObject cfg_{};

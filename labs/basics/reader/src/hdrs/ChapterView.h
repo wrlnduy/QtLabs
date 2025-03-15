@@ -17,7 +17,8 @@ class ChapterView : public QWidget {
 
    private slots:
     void goToRanobeView();
-    void toNextChapter();
+    void topToNextChapter();
+    void bottomToNextChapter();
     void toPrevChapter();
     void toChosenChapter();
 

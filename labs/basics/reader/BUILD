@@ -8,6 +8,14 @@ load(
 qt_resource_via_qrc(
     name = "resources",
     files = [
+        "resources/books/mushoku-tensei/chapters/c1.txt",
+        "resources/books/mushoku-tensei/chapters/c2.txt",
+        "resources/books/mushoku-tensei/chapters/c3.txt",
+        "resources/books/mushoku-tensei/titleInfo.json",
+        "resources/books/omniscient-readers-viewpoint/chapters/c1.txt",
+        "resources/books/omniscient-readers-viewpoint/chapters/c2.txt",
+        "resources/books/omniscient-readers-viewpoint/chapters/c3.txt",
+        "resources/books/omniscient-readers-viewpoint/titleInfo.json",
         "resources/books/sss-class-suicide-hunter/chapters/c1.txt",
         "resources/books/sss-class-suicide-hunter/chapters/c2.txt",
         "resources/books/sss-class-suicide-hunter/chapters/c3.txt",

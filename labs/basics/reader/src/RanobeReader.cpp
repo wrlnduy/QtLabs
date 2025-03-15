@@ -2,6 +2,8 @@
 
 #include "hdrs/ChapterView.h"
 
+#include <QScrollArea>
+
 RanobeReader::RanobeReader(QWidget* parent) : QMainWindow(parent) {
     central_ = new QWidget;
     setCentralWidget(central_);
@@ -13,6 +15,8 @@ RanobeReader::RanobeReader(QWidget* parent) : QMainWindow(parent) {
     ranobeList_ = new RanobeList;
     ranobeList_->uploadRanobeList(cfg_);
 
+    ranobeScrollList_ = new QScrollArea;
+
     connect(ranobeList_, &QListWidget::itemDoubleClicked, this, &RanobeReader::RanobeChosen);
 
     widgetStack_ = new QStackedWidget;
@@ -20,7 +24,7 @@ RanobeReader::RanobeReader(QWidget* parent) : QMainWindow(parent) {
 
     central_->setLayout(layout);
 
-    setRanobeListLayout();
+    setRanobeList();
 }
 
 void RanobeReader::clearWindow() const {
@@ -43,7 +47,7 @@ void RanobeReader::setWindowWidget(QWidget* widget) const {
 
 void RanobeReader::RanobeChosen(QListWidgetItem* item) {
     auto* ranobe = dynamic_cast<RanobeListItem*>((item->listWidget())->itemWidget(item));
-    setRanobeViewLayout(ranobe->getTitleName());
+    setRanobeView(ranobe->getTitleName());
 }
 
 void RanobeReader::resizeEvent(QResizeEvent* event) {
@@ -70,32 +74,43 @@ void RanobeReader::setChapterView(const QString& titleName, const int& chapterIn
     const QString ruTitleName = titleInfo["ru"].toString();
     chapterView_ = new ChapterView(titleName, ruTitleName, chapterIndex);
     setWindowWidget(chapterView_);
-    connect(chapterView_, &ChapterView::toRanobeView, this, &RanobeReader::setRanobeViewLayout);
+    connect(chapterView_, &ChapterView::toRanobeView, this, &RanobeReader::setRanobeView);
     currentLayout = LayoutType::ChapterView;
 }
 
-void RanobeReader::setRanobeListLayout() {
+void RanobeReader::setRanobeList() {
     auto* layout = new QVBoxLayout;
 
     auto* label = new QLabel(QString("Каталог"));
+    label->setStyleSheet("font-weight: bold; color: orange");
     label->setAlignment(Qt::AlignCenter);
     layout->addWidget(label);
 
-    layout->addWidget(ranobeList_);
+    ranobeList_->setIconSize(QSize(width() / 4, height() / 4));
+
+    ranobeScrollList_->setWidget(ranobeList_);
+    ranobeScrollList_->setWidgetResizable(true);
+    ranobeScrollList_->adjustSize();
+
+    layout->addWidget(ranobeScrollList_);
     setWindowLayout(layout);
 
     currentLayout = LayoutType::RanobeList;
 }
 
-void RanobeReader::setRanobeViewLayout(const QString& titleName) {
+void RanobeReader::setRanobeView(const QString& titleName) {
     auto* layout = new QVBoxLayout;
 
     const QJsonObject titleInfo = cfg_[titleName].toObject();
 
     const QString ruTitleName = titleInfo["ru"].toString();
 
+    auto* toRanobeList = new QPushButton(QString("К катологу"));
+    layout->addWidget(toRanobeList);
+
     auto* label = new QLabel(ruTitleName);
     label->setAlignment(Qt::AlignCenter);
+    label->setStyleSheet("font-weight: bold; color: orange");
     layout->addWidget(label);
 
     QIcon icon(QString(":/resources/images/") + titleName + QString(".jpg"));
@@ -107,6 +122,7 @@ void RanobeReader::setRanobeViewLayout(const QString& titleName) {
     ranobeView_->setIconSize(QSize(width() / 3, height() / 3));
 
     connect(ranobeView_, &RanobeView::chapterChosen, this, &RanobeReader::setChapterView);
+    connect(toRanobeList, &QPushButton::pressed, this, &RanobeReader::setRanobeList);
 
     currentLayout = LayoutType::RanobeView;
 }

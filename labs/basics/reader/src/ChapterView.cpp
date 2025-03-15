@@ -76,9 +76,9 @@ ChapterView::ChapterView(
     connect(toRanobeViewButton_, &QPushButton::pressed, this, &ChapterView::goToRanobeView);
     connect(topPrevChapterButton_, &QPushButton::pressed, this, &ChapterView::toPrevChapter);
     connect(chapterChooseBox_, &QComboBox::currentIndexChanged, this, &ChapterView::toChosenChapter);
-    connect(topNextChapterButton_, &QPushButton::pressed, this, &ChapterView::toNextChapter);
+    connect(topNextChapterButton_, &QPushButton::pressed, this, &ChapterView::topToNextChapter);
     connect(bottomPrevChapterButton_, &QPushButton::pressed, this, &ChapterView::toPrevChapter);
-    connect(bottomNextChapterButton_, &QPushButton::pressed, this, &ChapterView::toNextChapter);
+    connect(bottomNextChapterButton_, &QPushButton::pressed, this, &ChapterView::bottomToNextChapter);
 
     setLayout(layout);
 }
@@ -92,6 +92,7 @@ void ChapterView::toPrevChapter() {
         return;
     }
     chapterIndex_--;
+    chapterChooseBox_->setCurrentIndex(chapterIndex_);
     chapterFilename_ = chapterFilenames_.at(chapterIndex_).toString();
     chapterName_->setText(chapterNames_[chapterFilename_].toString());
     chapterText_->setText(readTxt(
@@ -109,12 +110,20 @@ void ChapterView::toPrevChapter() {
     }
 }
 
-void ChapterView::toNextChapter() {
+void ChapterView::topToNextChapter() {
+    if (chapterIndex_ == chapterCount_ - 1) {
+        return;
+    }
+    bottomToNextChapter();
+}
+
+void ChapterView::bottomToNextChapter() {
     if (chapterIndex_ == chapterCount_ - 1) {
         emit toRanobeView(titleName_);
         return;
     }
     chapterIndex_++;
+    chapterChooseBox_->setCurrentIndex(chapterIndex_);
     chapterFilename_ = chapterFilenames_.at(chapterIndex_).toString();
     chapterName_->setText(chapterNames_[chapterFilename_].toString());
     chapterText_->setText(readTxt(
@@ -134,7 +143,7 @@ void ChapterView::toNextChapter() {
 
 void ChapterView::toChosenChapter() {
     chapterIndex_ = chapterChooseBox_->currentIndex() - 1;
-    toNextChapter();
+    bottomToNextChapter();
 }
 
 QString ChapterView::readTxt(const QString& path) {

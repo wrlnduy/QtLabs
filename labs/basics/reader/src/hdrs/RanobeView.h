@@ -5,6 +5,7 @@
 #include <QJsonArray>
 #include <QLabel>
 #include <QListWidget>
+#include <QScrollArea>
 #include <QWidget>
 
 class RanobeView : public QWidget {
@@ -25,7 +26,8 @@ class RanobeView : public QWidget {
     QIcon icon_{};
     QLabel* iconLabel_{};
     QListWidget* chapterList_{};
-    QJsonArray chapterFilenamesArray_;
+    QJsonArray chapterFilenamesArray_{};
+    QScrollArea* synopsisScrollable_{};
 };
 
 #endif  // RANOBEVIEW_H
