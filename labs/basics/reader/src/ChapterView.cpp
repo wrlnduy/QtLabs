@@ -5,7 +5,8 @@
 #include <QScrollArea>
 #include <QVBoxLayout>
 
-ChapterView::ChapterView(const QString& titleName, const int& chapterIndex, QWidget* parent)
+ChapterView::ChapterView(
+    const QString& titleName, const QString& ruTitleName, const int& chapterIndex, QWidget* parent)
     : QWidget(parent), titleName_(titleName), chapterIndex_(chapterIndex) {
     auto titleInfo = JsonWork::parseJson(
         QString(":/resources/books/") + QString(titleName_) + QString("/titleInfo.json"));
@@ -15,6 +16,30 @@ ChapterView::ChapterView(const QString& titleName, const int& chapterIndex, QWid
     chapterFilename_ = chapterFilenames_.at(chapterIndex_).toString();
 
     auto* layout = new QVBoxLayout;
+
+    auto* topLayout = new QHBoxLayout;
+
+    toRanobeViewButton_ = new QPushButton(QString(ruTitleName));
+    topLayout->addWidget(toRanobeViewButton_);
+
+    topLayout->addSpacing(10);
+
+    topPrevChapterButton_ = new QPushButton(QString("<-"));
+    topLayout->addWidget(topPrevChapterButton_);
+
+    chapterChooseBox_ = new QComboBox;
+    for (int i = 0; i < chapterCount_; i++) {
+        chapterChooseBox_->addItem(chapterNames_[chapterFilenames_.at(i).toString()].toString());
+    }
+    chapterChooseBox_->setCurrentIndex(chapterIndex_);
+    topLayout->addWidget(chapterChooseBox_);
+
+    topNextChapterButton_ = new QPushButton(QString("->"));
+    topLayout->addWidget(topNextChapterButton_);
+
+    topLayout->addStretch(1);
+
+    layout->addLayout(topLayout);
 
     chapterName_ = new QLabel(chapterNames_[chapterFilename_].toString());
     layout->addWidget(chapterName_);
@@ -32,26 +57,34 @@ ChapterView::ChapterView(const QString& titleName, const int& chapterIndex, QWid
 
     auto* bottomLayout = new QHBoxLayout;
 
-    prevChapterButton_ = new QPushButton(QString("Назад"));
+    bottomPrevChapterButton_ = new QPushButton(QString("Назад"));
     if (chapterIndex_ == 0) {
-        prevChapterButton_->setText(QString("Это первая глава"));
+        bottomPrevChapterButton_->setText(QString("Это первая глава"));
     }
-    bottomLayout->addWidget(prevChapterButton_);
+    bottomLayout->addWidget(bottomPrevChapterButton_);
 
     bottomLayout->addStretch(1);
 
-    nextChapterButton_ = new QPushButton(QString("Вперёд"));
+    bottomNextChapterButton_ = new QPushButton(QString("Вперёд"));
     if (chapterIndex_ == chapterCount_ - 1) {
-        nextChapterButton_->setText(QString("К тайтлу"));
+        bottomNextChapterButton_->setText(QString("К тайтлу"));
     }
-    bottomLayout->addWidget(nextChapterButton_);
+    bottomLayout->addWidget(bottomNextChapterButton_);
 
     layout->addLayout(bottomLayout);
 
-    connect(prevChapterButton_, &QPushButton::pressed, this, &ChapterView::toPrevChapter);
-    connect(nextChapterButton_, &QPushButton::pressed, this, &ChapterView::toNextChapter);
+    connect(toRanobeViewButton_, &QPushButton::pressed, this, &ChapterView::goToRanobeView);
+    connect(topPrevChapterButton_, &QPushButton::pressed, this, &ChapterView::toPrevChapter);
+    connect(chapterChooseBox_, &QComboBox::currentIndexChanged, this, &ChapterView::toChosenChapter);
+    connect(topNextChapterButton_, &QPushButton::pressed, this, &ChapterView::toNextChapter);
+    connect(bottomPrevChapterButton_, &QPushButton::pressed, this, &ChapterView::toPrevChapter);
+    connect(bottomNextChapterButton_, &QPushButton::pressed, this, &ChapterView::toNextChapter);
 
     setLayout(layout);
+}
+
+void ChapterView::goToRanobeView() {
+    emit toRanobeView(titleName_);
 }
 
 void ChapterView::toPrevChapter() {
@@ -65,10 +98,14 @@ void ChapterView::toPrevChapter() {
         QString(":/resources/books/") + titleName_ + QString("/chapters/") + chapterFilename_ +
         QString(".txt")));
     if (chapterIndex_ == 0) {
-        prevChapterButton_->setText(QString("Это первая глава"));
+        bottomPrevChapterButton_->setText(QString("Это первая глава"));
+    } else {
+        bottomPrevChapterButton_->setText(QString("Назад"));
     }
     if (chapterIndex_ != chapterCount_ - 1) {
-        nextChapterButton_->setText(QString("Вперёд"));
+        bottomNextChapterButton_->setText(QString("Вперёд"));
+    } else {
+        bottomNextChapterButton_->setText(QString("К тайтлу"));
     }
 }
 
@@ -84,11 +121,20 @@ void ChapterView::toNextChapter() {
         QString(":/resources/books/") + titleName_ + QString("/chapters/") + chapterFilename_ +
         QString(".txt")));
     if (chapterIndex_ != 0) {
-        prevChapterButton_->setText(QString("Назад"));
+        bottomPrevChapterButton_->setText(QString("Назад"));
+    } else {
+        bottomPrevChapterButton_->setText(QString("Это первая глава"));
     }
     if (chapterIndex_ == chapterCount_ - 1) {
-        nextChapterButton_->setText(QString("К тайтлу"));
+        bottomNextChapterButton_->setText(QString("К тайтлу"));
+    } else {
+        bottomNextChapterButton_->setText(QString("Вперёд"));
     }
+}
+
+void ChapterView::toChosenChapter() {
+    chapterIndex_ = chapterChooseBox_->currentIndex() - 1;
+    toNextChapter();
 }
 
 QString ChapterView::readTxt(const QString& path) {

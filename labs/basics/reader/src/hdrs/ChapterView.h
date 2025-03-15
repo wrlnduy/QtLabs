@@ -1,6 +1,7 @@
 #ifndef CHAPTERVIEW_H
 #define CHAPTERVIEW_H
 
+#include <QComboBox>
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QLabel>
@@ -10,11 +11,15 @@
 class ChapterView : public QWidget {
     Q_OBJECT
    public:
-    ChapterView(const QString& titleName, const int& chapterIndex, QWidget* parent = nullptr);
+    ChapterView(
+        const QString& titleName, const QString& ruTitleName, const int& chapterIndex,
+        QWidget* parent = nullptr);
 
    private slots:
+    void goToRanobeView();
     void toNextChapter();
     void toPrevChapter();
+    void toChosenChapter();
 
    signals:
     void toRanobeView(const QString& titleName);
@@ -26,10 +31,14 @@ class ChapterView : public QWidget {
     int chapterCount_{};
     QJsonArray chapterFilenames_{};
     QJsonObject chapterNames_{};
-    QPushButton* prevChapterButton_{};
-    QPushButton* nextChapterButton_{};
+    QPushButton* toRanobeViewButton_{};
+    QPushButton* topPrevChapterButton_{};
+    QPushButton* topNextChapterButton_{};
+    QPushButton* bottomPrevChapterButton_{};
+    QPushButton* bottomNextChapterButton_{};
     QLabel* chapterText_{};
     QLabel* chapterName_;
+    QComboBox* chapterChooseBox_{};
 
     QString readTxt(const QString& path);
 };

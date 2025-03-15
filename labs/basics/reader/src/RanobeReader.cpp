@@ -66,7 +66,9 @@ void RanobeReader::resizeEvent(QResizeEvent* event) {
 }
 
 void RanobeReader::setChapterView(const QString& titleName, const int& chapterIndex) {
-    chapterView_ = new ChapterView(titleName, chapterIndex);
+    const QJsonObject titleInfo = cfg_[titleName].toObject();
+    const QString ruTitleName = titleInfo["ru"].toString();
+    chapterView_ = new ChapterView(titleName, ruTitleName, chapterIndex);
     setWindowWidget(chapterView_);
     connect(chapterView_, &ChapterView::toRanobeView, this, &RanobeReader::setRanobeViewLayout);
     currentLayout = LayoutType::ChapterView;
