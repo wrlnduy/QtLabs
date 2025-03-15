@@ -16,7 +16,7 @@ RanobeView::RanobeView(
     auto* chaptersLayout = new QVBoxLayout;
 
     iconLabel_ = new QLabel;
-    iconLabel_->setAlignment(Qt::AlignCenter);
+    iconLabel_->setAlignment(Qt::AlignTop);
     titleLayout->addWidget(iconLabel_);
 
     mainLayout->addLayout(titleLayout);
@@ -28,12 +28,12 @@ RanobeView::RanobeView(
 
     auto titleInfo = JsonWork::parseJson(
         QString(":/resources/books/") + QString(titleName_) + QString("/titleInfo.json"));
-    const int chaptersCount = titleInfo["chaptersCount"].toInt();
-    const QJsonArray chaptersArray = titleInfo["chapters"].toArray();
+    const int chaptersCount = titleInfo["chapterCount"].toInt();
+    const QJsonObject chapterNames = titleInfo["chapterNames"].toObject();
+    chapterFilenamesArray_ = titleInfo["chapterFilenames"].toArray();
     for (int i = 0; i < chaptersCount; i++) {
-        const QJsonObject chapter = chaptersArray.at(i).toObject();
-        const QString filename = chapter["filename"].toString();
-        const QString chapterName = chapter["name"].toString();
+        const QString chapterFilename = chapterFilenamesArray_.at(i).toString();
+        const QString chapterName = chapterNames[chapterFilename].toString();
 
         auto* chapterNameLabel = new QLabel(chapterName);
 
@@ -60,7 +60,13 @@ RanobeView::RanobeView(
 
     mainLayout->addLayout(chaptersLayout);
 
+    connect(chapterList_, &QListWidget::itemDoubleClicked, this, &RanobeView::chapterDoubleClicked);
+
     setLayout(mainLayout);
+}
+
+void RanobeView::chapterDoubleClicked(QListWidgetItem* item) {
+    emit chapterChosen(titleName_, item->listWidget()->row(item));
 }
 
 void RanobeView::setIconSize(const QSize& size) {

@@ -1,5 +1,7 @@
 #include "hdrs/RanobeReader.h"
 
+#include "hdrs/ChapterView.h"
+
 RanobeReader::RanobeReader(QWidget* parent) : QMainWindow(parent) {
     central_ = new QWidget;
     setCentralWidget(central_);
@@ -34,6 +36,11 @@ void RanobeReader::setWindowLayout(QLayout* layout) const {
     widgetStack_->addWidget(widget);
 }
 
+void RanobeReader::setWindowWidget(QWidget* widget) const {
+    clearWindow();
+    widgetStack_->addWidget(widget);
+}
+
 void RanobeReader::RanobeChosen(QListWidgetItem* item) {
     auto* ranobe = dynamic_cast<RanobeListItem*>((item->listWidget())->itemWidget(item));
     setRanobeViewLayout(ranobe->getTitleName());
@@ -53,7 +60,16 @@ void RanobeReader::resizeEvent(QResizeEvent* event) {
         case LayoutType::RanobeView:
             ranobeView_->setIconSize(QSize(iconWidth / 3, iconHeight / 3));
             break;
+        case LayoutType::ChapterView:
+            break;
     }
+}
+
+void RanobeReader::setChapterView(const QString& titleName, const int& chapterIndex) {
+    chapterView_ = new ChapterView(titleName, chapterIndex);
+    setWindowWidget(chapterView_);
+    connect(chapterView_, &ChapterView::toRanobeView, this, &RanobeReader::setRanobeViewLayout);
+    currentLayout = LayoutType::ChapterView;
 }
 
 void RanobeReader::setRanobeListLayout() {
@@ -87,6 +103,8 @@ void RanobeReader::setRanobeViewLayout(const QString& titleName) {
     layout->addWidget(ranobeView_);
     setWindowLayout(layout);
     ranobeView_->setIconSize(QSize(width() / 3, height() / 3));
+
+    connect(ranobeView_, &RanobeView::chapterChosen, this, &RanobeReader::setChapterView);
 
     currentLayout = LayoutType::RanobeView;
 }
