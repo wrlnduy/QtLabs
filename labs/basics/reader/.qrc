@@ -5,8 +5,8 @@
         <file>resources/images/omniscient-readers-viewpoint.jpg</file>
         <file>resources/images/sss-class-suicide-hunter.jpg</file>
         <file>resources/books/sss-class-suicide-hunter/titleInfo.json</file>
-        <file>resources/books/sss-class-suicide-hunter/chapters/с1.txt</file>
-        <file>resources/books/sss-class-suicide-hunter/chapters/с2.txt</file>
-        <file>resources/books/sss-class-suicide-hunter/chapters/с3.txt</file>
+        <file>resources/books/sss-class-suicide-hunter/chapters/c1.txt</file>
+        <file>resources/books/sss-class-suicide-hunter/chapters/c2.txt</file>
+        <file>resources/books/sss-class-suicide-hunter/chapters/c3.txt</file>
     </qresource>
 </RCC>

@@ -8,9 +8,9 @@ load(
 qt_resource_via_qrc(
     name = "resources",
     files = [
-        "resources/books/sss-class-suicide-hunter/chapters/с1.txt",
-        "resources/books/sss-class-suicide-hunter/chapters/с2.txt",
-        "resources/books/sss-class-suicide-hunter/chapters/с3.txt",
+        "resources/books/sss-class-suicide-hunter/chapters/c1.txt",
+        "resources/books/sss-class-suicide-hunter/chapters/c2.txt",
+        "resources/books/sss-class-suicide-hunter/chapters/c3.txt",
         "resources/books/sss-class-suicide-hunter/titleInfo.json",
         "resources/cfg.json",
         "resources/images/mushoku-tensei.jpg",
