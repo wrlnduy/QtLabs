@@ -116,8 +116,11 @@ MainWindow::MainWindow(QWidget* parent)  // NOLINT
     green_progress_->setMinimum(0);
     green_progress_->setMaximum(count_->value());
 
-    auto* total_progress_label = new QLabel(QString("Общий прогресс: "));    // NOLINT
+    auto* total_progress_label = new QLabel(QString("Просмотренные билеты: "));    // NOLINT
     auto* green_progress_label = new QLabel(QString("Выученные билеты: "));  // NOLINT
+
+    total_progress_label->setAlignment(Qt::AlignCenter);
+    green_progress_label->setAlignment(Qt::AlignCenter);
 
     progress_layout->addWidget(total_progress_label);
     progress_layout->addWidget(total_progress_);
