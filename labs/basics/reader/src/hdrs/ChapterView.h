@@ -21,6 +21,7 @@ class ChapterView : public QWidget {
     void bottomToNextChapter();
     void toPrevChapter();
     void toChosenChapter();
+    void openCommentDialog();
 
    signals:
     void toRanobeView(const QString& titleName);
@@ -28,20 +29,32 @@ class ChapterView : public QWidget {
    private:
     QString titleName_{};
     QString chapterFilename_{};
+    QString comment_{};
+
     int chapterIndex_{};
     int chapterCount_{};
+
     QJsonArray chapterFilenames_{};
     QJsonObject chapterNames_{};
+
     QPushButton* toRanobeViewButton_{};
     QPushButton* topPrevChapterButton_{};
     QPushButton* topNextChapterButton_{};
+
     QPushButton* bottomPrevChapterButton_{};
     QPushButton* bottomNextChapterButton_{};
+
+    QPushButton* commentButton_{};
+
     QLabel* chapterText_{};
     QLabel* chapterName_;
+
     QComboBox* chapterChooseBox_{};
 
     QString readTxt(const QString& path);
+    void saveComment();
+    void loadComment();
+    void setChapterText();
 };
 
 #endif  // CHAPTERVIEW_H

@@ -17,7 +17,7 @@ void JsonWork::writeToJson(const QString& path, const QJsonObject& json) {
     QString jsonString = doc.toJson(QJsonDocument::Indented);
 
     QFile file;
-    file.setFileName("path");
+    file.setFileName(path);
     file.open(QIODevice::WriteOnly | QIODevice::Text);
     QTextStream stream(&file);
     stream << jsonString;

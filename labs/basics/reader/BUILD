@@ -29,7 +29,7 @@ qt_resource_via_qrc(
 )
 
 qt_cc_library(
-    name = "mini_games",
+    name = "reader_lib",
     srcs = [
         "src/ChapterView.cpp",
         "src/JsonWork.cpp",
@@ -54,10 +54,10 @@ qt_cc_library(
 )
 
 qt_cc_binary(
-    name = "main",
+    name = "reader",
     srcs = ["main.cpp"],
     deps = [
-        ":mini_games",
+        ":reader_lib",
         ":resources",
         "@rules_qt//:qt_core",
         "@rules_qt//:qt_widgets",

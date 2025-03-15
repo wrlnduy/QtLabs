@@ -2,8 +2,13 @@
 
 #include "hdrs/JsonWork.h"
 
+#include <QDialog>
+#include <QDialogButtonBox>
 #include <QScrollArea>
+#include <QTextEdit>
 #include <QVBoxLayout>
+#include <QSettings>
+#include <QTextStream>
 
 ChapterView::ChapterView(
     const QString& titleName, const QString& ruTitleName, const int& chapterIndex, QWidget* parent)
@@ -44,10 +49,11 @@ ChapterView::ChapterView(
     chapterName_ = new QLabel(chapterNames_[chapterFilename_].toString());
     layout->addWidget(chapterName_);
 
-    chapterText_ = new QLabel(readTxt(
-        QString(":/resources/books/") + titleName_ + QString("/chapters/") + chapterFilename_ +
-        QString(".txt")));
+    chapterText_ = new QLabel;
+    setChapterText();
     chapterText_->setWordWrap(true);
+
+    loadComment();
 
     auto* chapterTextScroll = new QScrollArea;
     chapterTextScroll->setWidget(chapterText_);
@@ -65,6 +71,11 @@ ChapterView::ChapterView(
 
     bottomLayout->addStretch(1);
 
+    commentButton_ = new QPushButton(QString("Комментировать"));
+    bottomLayout->addWidget(commentButton_, 0, Qt::AlignCenter);
+
+    bottomLayout->addStretch(1);
+
     bottomNextChapterButton_ = new QPushButton(QString("Вперёд"));
     if (chapterIndex_ == chapterCount_ - 1) {
         bottomNextChapterButton_->setText(QString("К тайтлу"));
@@ -75,10 +86,13 @@ ChapterView::ChapterView(
 
     connect(toRanobeViewButton_, &QPushButton::pressed, this, &ChapterView::goToRanobeView);
     connect(topPrevChapterButton_, &QPushButton::pressed, this, &ChapterView::toPrevChapter);
-    connect(chapterChooseBox_, &QComboBox::currentIndexChanged, this, &ChapterView::toChosenChapter);
+    connect(
+        chapterChooseBox_, &QComboBox::currentIndexChanged, this, &ChapterView::toChosenChapter);
     connect(topNextChapterButton_, &QPushButton::pressed, this, &ChapterView::topToNextChapter);
     connect(bottomPrevChapterButton_, &QPushButton::pressed, this, &ChapterView::toPrevChapter);
-    connect(bottomNextChapterButton_, &QPushButton::pressed, this, &ChapterView::bottomToNextChapter);
+    connect(
+        bottomNextChapterButton_, &QPushButton::pressed, this, &ChapterView::bottomToNextChapter);
+    connect(commentButton_, &QPushButton::pressed, this, &ChapterView::openCommentDialog);
 
     setLayout(layout);
 }
@@ -95,9 +109,8 @@ void ChapterView::toPrevChapter() {
     chapterChooseBox_->setCurrentIndex(chapterIndex_);
     chapterFilename_ = chapterFilenames_.at(chapterIndex_).toString();
     chapterName_->setText(chapterNames_[chapterFilename_].toString());
-    chapterText_->setText(readTxt(
-        QString(":/resources/books/") + titleName_ + QString("/chapters/") + chapterFilename_ +
-        QString(".txt")));
+    setChapterText();
+    loadComment();
     if (chapterIndex_ == 0) {
         bottomPrevChapterButton_->setText(QString("Это первая глава"));
     } else {
@@ -126,9 +139,8 @@ void ChapterView::bottomToNextChapter() {
     chapterChooseBox_->setCurrentIndex(chapterIndex_);
     chapterFilename_ = chapterFilenames_.at(chapterIndex_).toString();
     chapterName_->setText(chapterNames_[chapterFilename_].toString());
-    chapterText_->setText(readTxt(
-        QString(":/resources/books/") + titleName_ + QString("/chapters/") + chapterFilename_ +
-        QString(".txt")));
+    setChapterText();
+    loadComment();
     if (chapterIndex_ != 0) {
         bottomPrevChapterButton_->setText(QString("Назад"));
     } else {
@@ -146,9 +158,59 @@ void ChapterView::toChosenChapter() {
     bottomToNextChapter();
 }
 
+void ChapterView::openCommentDialog() {
+    QDialog dialog(this);
+    dialog.setWindowTitle("Редактирование комментария");
+    dialog.setMinimumWidth(400);
+    auto* dialogLayout = new QVBoxLayout(&dialog);
+
+    dialog.setWindowFlags(Qt::Window | Qt::WindowMinimizeButtonHint
+                                  | Qt::WindowMaximizeButtonHint
+                                  | Qt::WindowCloseButtonHint);
+
+    auto* textEdit = new QTextEdit;
+    textEdit->setPlainText(comment_);
+    dialogLayout->addWidget(textEdit);
+
+    auto* buttonBox = new QDialogButtonBox(Qt::Horizontal, &dialog);
+
+    buttonBox->addButton("Сохранить", QDialogButtonBox::AcceptRole);
+    buttonBox->addButton("Отменить", QDialogButtonBox::RejectRole);
+
+    dialogLayout->addWidget(buttonBox);
+
+    connect(buttonBox, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
+    connect(buttonBox, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+
+    if (dialog.exec() == QDialog::Accepted) {
+        comment_ = textEdit->toPlainText();
+        saveComment();
+    }
+}
+
+void ChapterView::saveComment() {
+    QSettings settings;
+    settings.beginGroup("Titles/" + titleName_);
+    settings.setValue("Chapters/" + chapterFilename_ + "/Comment", comment_);
+    settings.endGroup();
+}
+
+void ChapterView::loadComment() {
+    QSettings settings;
+    settings.beginGroup("Titles/" + titleName_);
+    comment_ = settings.value("Chapters/" + chapterFilename_ + "/Comment", "").toString();
+    settings.endGroup();
+}
+
+void ChapterView::setChapterText() {
+    chapterText_->setText(readTxt(
+        QString(":/resources/books/") + titleName_ + QString("/chapters/") + chapterFilename_ +
+        QString(".txt")));
+}
+
 QString ChapterView::readTxt(const QString& path) {
     QFile file(path);
     file.open(QIODevice::ReadOnly);
     QTextStream textStream(&file);
-    return std::move(textStream.readAll());
+    return textStream.readAll();
 }
