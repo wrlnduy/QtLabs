@@ -20,6 +20,8 @@ class Ray {
 
     [[nodiscard]] double GetAngle() const;
 
+    [[nodiscard]] Ray Rotate(const double&) const;
+
    private:
     QPointF begin_{};
     QPointF end_{};
