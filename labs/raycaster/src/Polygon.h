@@ -13,7 +13,7 @@ class Polygon {
     Polygon() = default;
     explicit Polygon(const std::vector<QPointF>&);
 
-    [[nodiscard]] std::vector<QPointF> GetVertices() const;
+    [[nodiscard]] const std::vector<QPointF>& GetVertices() const;
 
     [[nodiscard]] QPointF GetVertex(const size_t&) const;
 
