@@ -4,6 +4,7 @@
 #include "Controller.h"
 #include "FPSCounter.h"
 #include "GraphicsView.h"
+#include "Polygon.h"
 
 #include <QGraphicsScene>
 #include <QGraphicsView>
@@ -12,7 +13,7 @@
 #include <QVBoxLayout>
 #include <QWidget>
 
-enum class Modes { Light, Polygon };
+enum class InputModes { Light, Polygon };
 
 class Raycaster final : public QMainWindow {
     Q_OBJECT
@@ -34,7 +35,7 @@ class Raycaster final : public QMainWindow {
     QGraphicsScene* scene_{};
 
     Controller controller_{};
-    Modes mode_ = Modes::Light;
+    InputModes mode_ = InputModes::Light;
 
     void Render() const;
     void DrawPolygon(const Polygon&, const QPen&, const QBrush&) const;

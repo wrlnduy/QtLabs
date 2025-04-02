@@ -5,10 +5,10 @@
 #include "Utils.h"
 
 #include <QPointF>
+#include <algorithm>
 #include <cmath>
 #include <utility>
 #include <vector>
-#include <algorithm>
 
 const std::vector<Polygon>& Controller::GetPolygons() const {
     return polygons_;
@@ -47,8 +47,8 @@ std::vector<Ray> Controller::CastRays() const {
                 Ray(light_source_, vertex,
                     std::atan2(vertex.y() - light_source_.y(), vertex.x() - light_source_.x()));
             rays.emplace_back(ray);
-            rays.emplace_back(ray.Rotate(+.000'1));
-            rays.emplace_back(ray.Rotate(-.000'1));
+            rays.emplace_back(ray.Rotate(+.000'01));
+            rays.emplace_back(ray.Rotate(-.000'01));
         }
     }
     return std::move(rays);
@@ -64,7 +64,8 @@ void Controller::IntersectRays(std::vector<Ray>* rays) const {
             const auto& begin = ray.GetBegin();
             const auto& end = ray.GetEnd();
             const auto& new_end = intersection.value();
-            if (!Utils::IsLess(Utils::GetDistance(begin, new_end), Utils::GetDistance(begin, end))) {
+            if (!Utils::IsLess(
+                    Utils::GetDistance(begin, new_end), Utils::GetDistance(begin, end))) {
                 continue;
             }
             ray.SetEnd(new_end);
@@ -98,3 +99,9 @@ Polygon Controller::CreateLightArea() const {
     return std::move(light_area);
 }
 
+void Controller::Scale(const QPointF& scale) {
+    for (auto& polygon : polygons_) {
+        polygon.Scale(scale);
+    }
+    Utils::Scale(light_source_, scale);
+}

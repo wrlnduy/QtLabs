@@ -64,6 +64,12 @@ std::optional<QPointF> Polygon::IntersectRay(const Ray& ray) const {
     return std::nullopt;
 }
 
+void Polygon::Scale(const QPointF& scale) {
+    for (auto& vertex : vertices_) {
+        Utils::Scale(vertex, scale);
+    }
+}
+
 std::optional<QPointF> Polygon::FindIntersection(
     const QPointF& ray_begin, const QPointF& ray_dir, const QPointF& edge_begin,
     const QPointF& edge_end) {

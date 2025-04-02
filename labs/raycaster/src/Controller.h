@@ -20,6 +20,7 @@ class Controller {
     void IntersectRays(std::vector<Ray>* rays) const;
     static void RemoveAdjacentRays(std::vector<Ray>* rays) ;
     Polygon CreateLightArea() const;
+    void Scale(const QPointF&);
 
    private:
     std::vector<Polygon> polygons_{};

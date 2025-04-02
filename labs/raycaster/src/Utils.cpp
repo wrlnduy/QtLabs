@@ -22,3 +22,7 @@ bool Utils::IsMore(const double& x, const double& y) {
 double Utils::GetDistance(const QPointF& a, const QPointF& b) {
     return std::hypot(a.x() - b.x(), a.y() - b.y());
 }
+
+void Utils::Scale(QPointF& point, const QPointF& scale) {
+    point = {point.x() * scale.x(), point.y() * scale.y()};
+}

@@ -15,6 +15,8 @@ class Utils {
 
     static double GetDistance(const QPointF&, const QPointF&);
 
+    static void Scale(QPointF&, const QPointF&);
+
    private:
     static constexpr double kEps = 1e-6;
 };

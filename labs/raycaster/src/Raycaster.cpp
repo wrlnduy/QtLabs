@@ -61,6 +61,10 @@ Raycaster::Raycaster(QWidget* parent) : QMainWindow(parent) {
 
     connect(view_, &GraphicsView::MouseMoved, this, &Raycaster::MouseMoved);
     connect(view_, &GraphicsView::MousePressed, this, &Raycaster::MousePressed);
+    connect(view_, &GraphicsView::ViewScaled, this, [this](const QPointF& scale) {
+        controller_.Scale(scale);
+        Render();
+    });
 
     layout->addWidget(view_);
 
@@ -71,7 +75,7 @@ void Raycaster::LightModePressed(bool checked) {
     if (!checked) {
         return;
     }
-    mode_ = Modes::Light;
+    mode_ = InputModes::Light;
 }
 
 void Raycaster::PolygonModePressed(bool checked) {
@@ -80,15 +84,15 @@ void Raycaster::PolygonModePressed(bool checked) {
         controller_.RemoveLastPolygon();
         return;
     }
-    mode_ = Modes::Polygon;
+    mode_ = InputModes::Polygon;
     controller_.AddPolygon({});
 }
 
 void Raycaster::MouseMoved(const QPointF& scene_pos) {
     switch (mode_) {
-        case Modes::Light:
+        case InputModes::Light:
             MouseMovedLight(scene_pos);
-        case Modes::Polygon:
+        case InputModes::Polygon:
             break;
         default:;
     }
@@ -96,9 +100,9 @@ void Raycaster::MouseMoved(const QPointF& scene_pos) {
 
 void Raycaster::MousePressed(const QPointF& scene_pos, Qt::MouseButton button) {
     switch (mode_) {
-        case Modes::Light:
+        case InputModes::Light:
             break;
-        case Modes::Polygon:
+        case InputModes::Polygon:
             MousePressedPolygon(scene_pos, button);
         default:;
     }
@@ -145,7 +149,7 @@ void Raycaster::DrawPolygons() const {
 void Raycaster::DrawLight() const {
     QPainterPath path;
 
-    path.addEllipse(controller_.GetLightSource(), 3, 3);
+    path.addEllipse(controller_.GetLightSource(), 2, 2);
     scene_->addPath(path, QPen(Qt::darkRed), QBrush(Qt::darkRed));
 }
 

@@ -14,11 +14,12 @@ class GraphicsView final : public QGraphicsView {
    signals:
     void MousePressed(QPointF pos, Qt::MouseButton button);
     void MouseMoved(QPointF pos);
+    void ViewScaled(QPointF scale);
 
    protected:
     void mousePressEvent(QMouseEvent*) override;
-
     void mouseMoveEvent(QMouseEvent*) override;
+    void resizeEvent(QResizeEvent* event) override;
 };
 
 #endif  // GRAPHICSVIEW_H
