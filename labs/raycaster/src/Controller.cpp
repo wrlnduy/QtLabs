@@ -1,11 +1,20 @@
 #include "Controller.h"
 
-const std::vector<Polygon>& Controller::GetPolygons() {
+#include "Polygon.h"
+
+#include <QPointF>
+#include <vector>
+
+const std::vector<Polygon>& Controller::GetPolygons() const {
     return polygons_;
 }
 
 void Controller::AddPolygon(const Polygon& polygon) {
     polygons_.emplace_back(polygon);
+}
+
+void Controller::RemoveLastPolygon() {
+    polygons_.pop_back();
 }
 
 void Controller::AddVertexToLastPolygon(const QPointF& vertex) {

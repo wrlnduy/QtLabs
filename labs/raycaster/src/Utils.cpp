@@ -1,16 +1,16 @@
-#include "utils.h"
+#include "Utils.h"
 
 #include <cmath>
 
-bool utils::isEqual(const double& x, const double& y) {
+bool Utils::IsEqual(const double& x, const double& y) {
     return std::fabs(x - y) <= k_eps;
 }
 
-bool utils::isLess(const double& x, const double& y) {
+bool Utils::IsLess(const double& x, const double& y) {
     return x - y < k_eps;
 }
 
-bool utils::isMore(const double& x, const double& y) {
+bool Utils::IsMore(const double& x, const double& y) {
     return x - y > k_eps;
 }
 
