@@ -65,10 +65,6 @@ Raycaster::Raycaster(QWidget* parent) : QMainWindow(parent) {
     layout->addWidget(view_);
 
     central->setLayout(layout);
-
-    auto* refresh_timer = new QTimer;
-    connect(refresh_timer, &QTimer::timeout, this, [this]() { this->update(); });
-    refresh_timer->start(10);
 }
 
 void Raycaster::LightModePressed(bool checked) {
