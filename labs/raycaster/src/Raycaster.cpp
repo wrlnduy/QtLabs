@@ -1,5 +1,6 @@
 #include "Raycaster.h"
 
+#include "FPSCounter.h"
 #include "GraphicsView.h"
 #include "Polygon.h"
 
@@ -12,6 +13,7 @@
 #include <QPainterPath>
 #include <QPen>
 #include <QRadioButton>
+#include <QTimer>
 #include <QVBoxLayout>
 #include <QWidget>
 #include <cstddef>
@@ -23,22 +25,25 @@ Raycaster::Raycaster(QWidget* parent) : QMainWindow(parent) {
 
     auto* layout = new QVBoxLayout;
 
-    auto* mode_layout_ = new QHBoxLayout;
+    auto* top_layout_ = new QHBoxLayout;
 
     light_mode_ = new QRadioButton("Light");
     polygon_mode_ = new QRadioButton("Polygon");
 
     light_mode_->setChecked(true);
 
-    mode_layout_->addWidget(new QLabel("Mode: "));
-    mode_layout_->addWidget(light_mode_);
-    mode_layout_->addWidget(polygon_mode_);
-    mode_layout_->addStretch(1);
+    fps_counter_ = new FPSCounter;
+
+    top_layout_->addWidget(new QLabel("Mode: "));
+    top_layout_->addWidget(light_mode_);
+    top_layout_->addWidget(polygon_mode_);
+    top_layout_->addStretch(1);
+    top_layout_->addWidget(fps_counter_);
 
     connect(light_mode_, &QRadioButton::toggled, this, &Raycaster::LightModePressed);
     connect(polygon_mode_, &QRadioButton::toggled, this, &Raycaster::PolygonModePressed);
 
-    layout->addLayout(mode_layout_);
+    layout->addLayout(top_layout_);
 
     view_ = new GraphicsView;
     view_->setMinimumSize(800, 600);
@@ -59,6 +64,10 @@ Raycaster::Raycaster(QWidget* parent) : QMainWindow(parent) {
     layout->addWidget(view_);
 
     central->setLayout(layout);
+
+    auto* refresh_timer = new QTimer;
+    connect(refresh_timer, &QTimer::timeout, this, [this]() { this->update(); });
+    refresh_timer->start(10);
 }
 
 void Raycaster::LightModePressed(bool checked) {
@@ -139,7 +148,6 @@ void Raycaster::MouseMovedLight(const QPointF& scene_pos) {
     controller_.SetLightSource(scene_pos);
     Render();
 }
-
 
 void Raycaster::MousePressedPolygon(const QPointF& scene_pos, Qt::MouseButton button) {
     if (button == Qt::RightButton) {

@@ -2,6 +2,7 @@
 #define RAYCASTER_H
 
 #include "Controller.h"
+#include "FPSCounter.h"
 #include "GraphicsView.h"
 
 #include <QGraphicsScene>
@@ -26,6 +27,8 @@ class Raycaster : public QMainWindow {
    private:
     QRadioButton* light_mode_{};
     QRadioButton* polygon_mode_{};
+
+    FPSCounter* fps_counter_{};
 
     GraphicsView* view_{};
     QGraphicsScene* scene_{};
