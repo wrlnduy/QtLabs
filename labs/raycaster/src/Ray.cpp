@@ -1,5 +1,7 @@
 #include "Ray.h"
 
+#include "Utils.h"
+
 #include <QPointF>
 #include <cmath>
 
@@ -32,8 +34,10 @@ double Ray::GetAngle() const {
 }
 
 Ray Ray::Rotate(const double& angle) const {
+    double new_angle = angle + angle_;
+    constexpr double k_too_big_num = 10'000.;
     const QPointF end(
-        begin_.x() + std::cos(angle_ + angle),
-        begin_.y() + std::sin(angle_ + angle));
-    return {begin_, end, angle_ + angle};
+        begin_.x() + k_too_big_num * std::cos(new_angle),
+        begin_.y() + k_too_big_num * std::sin(new_angle));
+    return {begin_, end, new_angle};
 }

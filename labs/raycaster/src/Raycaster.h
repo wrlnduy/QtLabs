@@ -14,7 +14,7 @@
 
 enum class Modes { Light, Polygon };
 
-class Raycaster : public QMainWindow {
+class Raycaster final : public QMainWindow {
     Q_OBJECT
    public:
     Raycaster(QWidget* parent = nullptr);
@@ -37,6 +37,7 @@ class Raycaster : public QMainWindow {
     Modes mode_ = Modes::Light;
 
     void Render() const;
+    void DrawPolygon(const Polygon&, const QPen&, const QBrush&) const;
     void DrawPolygons() const;
     void DrawLight() const;
     void MouseMovedLight(const QPointF&);

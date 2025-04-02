@@ -32,7 +32,7 @@ void Polygon::UpdateLastVertex(const QPointF& vertex) {
     vertices_.back() = vertex;
 }
 
-std::optional<QPointF> Polygon::IntersectRay(const Ray& ray) {
+std::optional<QPointF> Polygon::IntersectRay(const Ray& ray) const {
     QPointF closest;
     double min_dist = std::numeric_limits<double>::max();
     bool found = false;
@@ -44,7 +44,7 @@ std::optional<QPointF> Polygon::IntersectRay(const Ray& ray) {
         const QPointF v1 = GetVertex(i);
         const QPointF v2 = GetVertex(i + 1);
 
-        auto intersection = findIntersection(ray_begin, ray_dir, v1, v2);
+        auto intersection = FindIntersection(ray_begin, ray_dir, v1, v2);
         if (intersection.has_value()) {
             const double dist = std::hypot(
                 intersection.value().x() - ray.GetBegin().x(),
@@ -64,7 +64,7 @@ std::optional<QPointF> Polygon::IntersectRay(const Ray& ray) {
     return std::nullopt;
 }
 
-std::optional<QPointF> Polygon::findIntersection(
+std::optional<QPointF> Polygon::FindIntersection(
     const QPointF& ray_begin, const QPointF& ray_dir, const QPointF& edge_begin,
     const QPointF& edge_end) {
     const QPointF edge_dir = edge_end - edge_begin;

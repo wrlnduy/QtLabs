@@ -53,8 +53,9 @@ Raycaster::Raycaster(QWidget* parent) : QMainWindow(parent) {
 
     controller_.AddPolygon(
         Polygon({QPointF(0, 0), QPointF(0, 600), QPointF(800, 600), QPointF(800, 0)}));
+    controller_.SetLightSource({400, 300});
 
-    DrawPolygons();
+    Render();
 
     view_->setScene(scene_);
 
@@ -109,31 +110,39 @@ void Raycaster::MousePressed(const QPointF& scene_pos, Qt::MouseButton button) {
 
 void Raycaster::Render() const {
     DrawPolygons();
+
+    const auto light_area = controller_.CreateLightArea();
+    DrawPolygon(light_area, QPen(Qt::red), QBrush(QColor(250, 92, 92)));
+
     DrawLight();
+}
+
+void Raycaster::DrawPolygon(const Polygon& polygon, const QPen& pen, const QBrush& brush) const {
+    const auto& vertices = polygon.GetVertices();
+
+    if (vertices.empty()) {
+        return;
+    }
+
+    QPainterPath path;
+    path.moveTo(vertices[0]);
+
+    for (size_t i = 1; i < vertices.size(); ++i) {
+        path.lineTo(vertices[i]);
+    }
+
+    if (vertices.size() > 2) {
+        path.lineTo(vertices[0]);
+    }
+
+    scene_->addPath(path, pen, brush);
 }
 
 void Raycaster::DrawPolygons() const {
     scene_->clear();
 
     for (const auto& polygon : controller_.GetPolygons()) {
-        const auto& vertices = polygon.GetVertices();
-
-        if (vertices.empty()) {
-            continue;
-        }
-
-        QPainterPath path;
-        path.moveTo(vertices[0]);
-
-        for (size_t i = 1; i < vertices.size(); ++i) {
-            path.lineTo(vertices[i]);
-        }
-
-        if (vertices.size() > 2) {
-            path.lineTo(vertices[0]);
-        }
-
-        scene_->addPath(path, QPen(Qt::black, 2), QBrush(Qt::gray));
+        DrawPolygon(polygon, QPen(Qt::black, 2), QBrush(Qt::gray));
     }
 }
 
@@ -141,7 +150,7 @@ void Raycaster::DrawLight() const {
     QPainterPath path;
 
     path.addEllipse(controller_.GetLightSource(), 3, 3);
-    scene_->addPath(path, QPen(Qt::red), QBrush(Qt::red));
+    scene_->addPath(path, QPen(Qt::darkRed), QBrush(Qt::darkRed));
 }
 
 void Raycaster::MouseMovedLight(const QPointF& scene_pos) {
@@ -154,7 +163,7 @@ void Raycaster::MousePressedPolygon(const QPointF& scene_pos, Qt::MouseButton bu
         if (controller_.GetPolygons().back().GetVertices().empty()) {
             controller_.RemoveLastPolygon();
         } else {
-            DrawPolygons();
+            Render();
         }
         controller_.AddPolygon({});
         return;

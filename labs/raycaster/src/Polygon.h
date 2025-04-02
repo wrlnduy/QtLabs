@@ -21,12 +21,12 @@ class Polygon {
 
     void UpdateLastVertex(const QPointF&);
 
-    [[nodiscard]] std::optional<QPointF> IntersectRay(const Ray&);
+    [[nodiscard]] std::optional<QPointF> IntersectRay(const Ray&) const;
 
    private:
     std::vector<QPointF> vertices_{};
 
-    std::optional<QPointF> findIntersection(
+    static std::optional<QPointF> FindIntersection(
         const QPointF&, const QPointF&, const QPointF&, const QPointF&);
 };
 

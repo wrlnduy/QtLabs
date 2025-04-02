@@ -2,6 +2,7 @@
 #define CONTROLLER_H
 
 #include "Polygon.h"
+#include "Ray.h"
 
 #include <QPointF>
 #include <vector>
@@ -15,6 +16,10 @@ class Controller {
     void UpdateLastPolygonVertex(const QPointF&);
     [[nodiscard]] QPointF GetLightSource() const;
     void SetLightSource(const QPointF&);
+    [[nodiscard]] std::vector<Ray> CastRays() const;
+    void IntersectRays(std::vector<Ray>* rays) const;
+    static void RemoveAdjacentRays(std::vector<Ray>* rays) ;
+    Polygon CreateLightArea() const;
 
    private:
     std::vector<Polygon> polygons_{};
