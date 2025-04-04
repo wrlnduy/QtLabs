@@ -4,6 +4,7 @@
 #include "Polygon.h"
 #include "Ray.h"
 
+#include <QColor>
 #include <QPointF>
 #include <cmath>
 #include <vector>
@@ -26,6 +27,11 @@ class Controller {
     [[nodiscard]] bool IsTooClose(const QPointF&, const double& k_max_dist = 1e-9) const;
     [[nodiscard]] const double& GetLightRadius() const;
     [[nodiscard]] const std::vector<QPointF>& GetDeltaLights() const;
+    [[nodiscard]] const std::vector<std::pair<QPointF, QColor>>& GetStaticLights() const;
+    [[nodiscard]] bool StaticLightsOverflow() const;
+    void AddStaticLight(const QPointF&, const QColor& color = Qt::white);
+    [[nodiscard]] bool CanPlaceLight(const QPointF&) const;
+    void RemoveLastStaticLight();
 
    private:
     std::vector<Polygon> polygons_{};
@@ -43,6 +49,9 @@ class Controller {
         }
         return deltas;
     }();
+
+    const size_t kMaxStaticLights = 20;
+    std::vector<std::pair<QPointF, QColor>> static_lights{};
 };
 
 #endif

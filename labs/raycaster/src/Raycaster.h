@@ -13,21 +13,23 @@
 #include <QVBoxLayout>
 #include <QWidget>
 
-enum class InputModes { Light, Polygon };
+enum class InputModes { Light, Polygon, StaticLights };
 
 class Raycaster final : public QMainWindow {
     Q_OBJECT
    public:
     Raycaster(QWidget* parent = nullptr);
    private slots:
-    void LightModePressed(bool checked);
-    void PolygonModePressed(bool checked);
+    void LightModeToggled(bool checked);
+    void PolygonModeToggled(bool checked);
+    void StaticLightsModeToggled(bool checked);
     void MouseMoved(const QPointF&);
     void MousePressed(const QPointF&, Qt::MouseButton);
 
    private:
     QRadioButton* light_mode_{};
     QRadioButton* polygon_mode_{};
+    QRadioButton* static_lights_mode_{};
 
     FPSCounter* fps_counter_{};
 
@@ -37,6 +39,8 @@ class Raycaster final : public QMainWindow {
     Controller controller_{};
     InputModes mode_ = InputModes::Light;
 
+    QTimer* refresh_timer_{};
+
     void Render() const;
     void DrawPolygon(const Polygon&, const QPen&, const QBrush&) const;
     void DrawPolygons() const;
@@ -44,6 +48,7 @@ class Raycaster final : public QMainWindow {
     void DrawLightArea() const;
     void MouseMovedLight(const QPointF&);
     void MousePressedPolygon(const QPointF&, Qt::MouseButton);
+    void MousePressedStaticLights(const QPointF&, Qt::MouseButton);
 };
 
 #endif

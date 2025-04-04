@@ -4,6 +4,7 @@
 #include "Ray.h"
 #include "Utils.h"
 
+#include <QColor>
 #include <QPointF>
 #include <algorithm>
 #include <cmath>
@@ -124,4 +125,37 @@ const double& Controller::GetLightRadius() const {
 
 const std::vector<QPointF>& Controller::GetDeltaLights() const {
     return kDeltaLights;
+}
+
+const std::vector<std::pair<QPointF, QColor>>& Controller::GetStaticLights() const {
+    return static_lights;
+}
+
+bool Controller::StaticLightsOverflow() const {
+    return static_lights.size() == kMaxStaticLights;
+}
+
+void Controller::AddStaticLight(const QPointF& light, const QColor& color) {
+    static_lights.emplace_back(light, color);
+}
+
+bool Controller::CanPlaceLight(const QPointF& point) const {
+    constexpr double kMaxDist = 1;
+    for (const auto& delta_light : kDeltaLights) {
+        const auto light = delta_light + point;
+        if (IsTooClose(light, kMaxDist) || !polygons_[0].ContainsPoint(light)) {
+            return false ;
+        }
+
+        for (size_t i = 1; i < polygons_.size(); i++) {
+            if (polygons_[i].ContainsPoint(light)) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+void Controller::RemoveLastStaticLight() {
+    static_lights.pop_back();
 }

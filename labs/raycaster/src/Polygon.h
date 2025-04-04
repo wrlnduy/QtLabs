@@ -22,7 +22,7 @@ class Polygon {
     void UpdateLastVertex(const QPointF&);
     [[nodiscard]] std::optional<QPointF> IntersectRay(const Ray&) const;
     void Scale(const QPointF&);
-    [[nodiscard]] double GetDistance (const QPointF&) const;
+    [[nodiscard]] double GetDistance(const QPointF&) const;
     [[nodiscard]] bool ContainsPoint(const QPointF&) const;
 
    private:
