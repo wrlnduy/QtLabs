@@ -5,16 +5,17 @@
 #include "Polygon.h"
 
 #include <QBrush>
-#include <QPainter>
 #include <QGraphicsPathItem>
 #include <QGraphicsScene>
 #include <QGraphicsView>
 #include <QHBoxLayout>
+#include <QKeySequence>
 #include <QLabel>
 #include <QMainWindow>
 #include <QPainterPath>
 #include <QPen>
 #include <QRadioButton>
+#include <QShortcut>
 #include <QTimer>
 #include <QVBoxLayout>
 #include <QWidget>
@@ -67,9 +68,38 @@ Raycaster::Raycaster(QWidget* parent) : QMainWindow(parent) {
         controller_.Scale(scale);
     });
 
+    const auto* clear_view_shortcut = new QShortcut(QKeySequence("Ctrl+R"), this);
+    connect(clear_view_shortcut, &QShortcut::activated, this, [this] {
+        while (controller_.GetPolygons().size() > 1) {
+            controller_.RemoveLastPolygon();
+        }
+        if (mode_ == InputModes::Polygon) {
+            PolygonModePressed(true);
+        }
+    });
+
+    const auto* remove_last_polygon_shortcut = new QShortcut(QKeySequence("Ctrl+Z"), this);
+    connect(remove_last_polygon_shortcut, &QShortcut::activated, this, [this] {
+        if (controller_.GetPolygons().back().GetVertices().empty()) {
+            controller_.RemoveLastPolygon();
+        }
+        if (controller_.GetPolygons().size() > 1) {
+            controller_.RemoveLastPolygon();
+        }
+        if (mode_ == InputModes::Polygon) {
+            PolygonModePressed(true);
+        }
+    });
+
+    const auto* end_polygon_shortcut = new QShortcut(QKeySequence("Ctrl+D"), this);
+    connect(end_polygon_shortcut, &QShortcut::activated, this, [this] {
+        MousePressed({}, Qt::RightButton);
+    });
+
     auto* refresh_timer = new QTimer;
     connect(refresh_timer, &QTimer::timeout, this, [this] { Render(); });
-    refresh_timer->start(0.1);
+    refresh_timer->setTimerType(Qt::PreciseTimer);
+    refresh_timer->start(1);
 
     layout->addWidget(view_);
 
