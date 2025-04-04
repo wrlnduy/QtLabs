@@ -23,6 +23,14 @@ double Utils::GetDistance(const QPointF& a, const QPointF& b) {
     return std::hypot(a.x() - b.x(), a.y() - b.y());
 }
 
+double Utils::GetAngle(const QPointF& a, const QPointF& b) {
+    return std::atan2(b.y() - a.y(), b.x() - a.x());
+}
+
 void Utils::Scale(QPointF& point, const QPointF& scale) {
     point = {point.x() * scale.x(), point.y() * scale.y()};
+}
+
+double Utils::Sqr(const double& x) {
+    return x * x;
 }

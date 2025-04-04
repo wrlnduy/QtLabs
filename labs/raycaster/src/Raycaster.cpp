@@ -5,6 +5,8 @@
 #include "Polygon.h"
 
 #include <QBrush>
+#include <QPainter>
+#include <QGraphicsPathItem>
 #include <QGraphicsScene>
 #include <QGraphicsView>
 #include <QHBoxLayout>
@@ -63,8 +65,11 @@ Raycaster::Raycaster(QWidget* parent) : QMainWindow(parent) {
     connect(view_, &GraphicsView::MousePressed, this, &Raycaster::MousePressed);
     connect(view_, &GraphicsView::ViewScaled, this, [this](const QPointF& scale) {
         controller_.Scale(scale);
-        Render();
     });
+
+    auto* refresh_timer = new QTimer;
+    connect(refresh_timer, &QTimer::timeout, this, [this] { Render(); });
+    refresh_timer->start(0.1);
 
     layout->addWidget(view_);
 
@@ -85,7 +90,7 @@ void Raycaster::PolygonModePressed(bool checked) {
         return;
     }
     mode_ = InputModes::Polygon;
-    controller_.AddPolygon({});
+    controller_.AddPolygon({}, PolygonType::Creating);
 }
 
 void Raycaster::MouseMoved(const QPointF& scene_pos) {
@@ -110,72 +115,88 @@ void Raycaster::MousePressed(const QPointF& scene_pos, Qt::MouseButton button) {
 
 void Raycaster::Render() const {
     DrawPolygons();
-
-    const auto light_area = controller_.CreateLightArea();
-    DrawPolygon(light_area, QPen(Qt::red), QBrush(QColor(250, 92, 92)));
-
+    DrawLightArea();
     DrawLight();
 }
 
 void Raycaster::DrawPolygon(const Polygon& polygon, const QPen& pen, const QBrush& brush) const {
     const auto& vertices = polygon.GetVertices();
-
     if (vertices.empty()) {
         return;
     }
-
     QPainterPath path;
     path.moveTo(vertices[0]);
-
-    for (size_t i = 1; i < vertices.size(); ++i) {
-        path.lineTo(vertices[i]);
+    if (vertices.size() == 1) {
+        path.addEllipse(vertices[0], 2, 2);
+    } else {
+        for (size_t i = 1; i < vertices.size(); ++i) {
+            path.lineTo(vertices[i]);
+        }
+        if (vertices.size() > 2 && polygon.GetType() == PolygonType::Finished) {
+            path.lineTo(vertices[0]);
+        }
     }
-
-    if (vertices.size() > 2) {
-        path.lineTo(vertices[0]);
-    }
-
     scene_->addPath(path, pen, brush);
 }
 
 void Raycaster::DrawPolygons() const {
     scene_->clear();
 
-    for (const auto& polygon : controller_.GetPolygons()) {
-        DrawPolygon(polygon, QPen(Qt::black, 2), QBrush(Qt::gray));
+    const auto& polygons = controller_.GetPolygons();
+
+    DrawPolygon(polygons[0], QPen(Qt::transparent), QBrush(Qt::black));
+    for (size_t i = 1; i < polygons.size(); i++) {
+        DrawPolygon(polygons[i], QPen(Qt::gray), QBrush(Qt::black));
     }
 }
 
 void Raycaster::DrawLight() const {
     QPainterPath path;
+    for (const auto& delta_light : controller_.GetDeltaLights()) {
+        path.clear();
+        const auto light = delta_light + controller_.GetLightSource();
+        path.addEllipse(light, controller_.GetLightRadius(), controller_.GetLightRadius());
+        scene_->addPath(path, QPen(Qt::darkRed), QBrush(Qt::darkRed));
+    }
+}
 
-    path.addEllipse(controller_.GetLightSource(), 2, 2);
-    scene_->addPath(path, QPen(Qt::darkRed), QBrush(Qt::darkRed));
+void Raycaster::DrawLightArea() const {
+    if (mode_ == InputModes::Polygon) {
+        return;
+    }
+    for (const auto& delta_light : controller_.GetDeltaLights()) {
+        const auto light = delta_light + controller_.GetLightSource();
+        const auto light_area = controller_.CreateLightArea(light);
+        DrawPolygon(light_area, QPen(Qt::transparent), QBrush(QColor(75, 82, 82, 128)));
+    }
 }
 
 void Raycaster::MouseMovedLight(const QPointF& scene_pos) {
+    constexpr double kMaxDist = 1;
+    const auto& polygons = controller_.GetPolygons();
+    for (const auto& delta_light : controller_.GetDeltaLights()) {
+        const auto light = delta_light + scene_pos;
+        if (controller_.IsTooClose(light, kMaxDist) || !polygons[0].ContainsPoint(light)) {
+            return;
+        }
+
+        for (size_t i = 1; i < polygons.size(); i++) {
+            if (polygons[i].ContainsPoint(light)) {
+                return;
+            }
+        }
+    }
     controller_.SetLightSource(scene_pos);
-    Render();
 }
 
 void Raycaster::MousePressedPolygon(const QPointF& scene_pos, Qt::MouseButton button) {
     if (button == Qt::RightButton) {
+        controller_.SetLastPolygonType(PolygonType::Finished);
         if (controller_.GetPolygons().back().GetVertices().empty()) {
             controller_.RemoveLastPolygon();
-        } else {
-            Render();
         }
-        controller_.AddPolygon({});
+        controller_.AddPolygon({}, PolygonType::Creating);
         return;
     }
     controller_.AddVertexToLastPolygon(scene_pos);
-    QPainterPath path;
-    const auto& vertices = controller_.GetPolygons().back().GetVertices();
-    path.moveTo(vertices.back());
-    if (vertices.size() > 1) {
-        path.lineTo(vertices[vertices.size() - 2]);
-    } else {
-        path.addEllipse(vertices.back(), .5, .5);
-    }
-    scene_->addPath(path, QPen(Qt::black, 2), QBrush(Qt::gray));
 }

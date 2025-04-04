@@ -19,6 +19,7 @@ QPointF Ray::GetBegin() const {
 
 void Ray::SetEnd(const QPointF& end) {
     end_ = end;
+    angle_ = Utils::GetAngle(begin_, end_);
 }
 
 QPointF Ray::GetEnd() const {

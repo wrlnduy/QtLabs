@@ -14,8 +14,9 @@ const std::vector<Polygon>& Controller::GetPolygons() const {
     return polygons_;
 }
 
-void Controller::AddPolygon(const Polygon& polygon) {
+void Controller::AddPolygon(const Polygon& polygon, PolygonType type) {
     polygons_.emplace_back(polygon);
+    polygons_.back().SetType(type);
 }
 
 void Controller::RemoveLastPolygon() {
@@ -30,6 +31,10 @@ void Controller::UpdateLastPolygonVertex(const QPointF& vertex) {
     polygons_.back().UpdateLastVertex(vertex);
 }
 
+void Controller::SetLastPolygonType(PolygonType type) {
+    polygons_.back().SetType(type);
+}
+
 QPointF Controller::GetLightSource() const {
     return light_source_;
 }
@@ -38,17 +43,15 @@ void Controller::SetLightSource(const QPointF& light_source) {
     light_source_ = light_source;
 }
 
-std::vector<Ray> Controller::CastRays() const {
+std::vector<Ray> Controller::CastRays(const QPointF& light) const {
     std::vector<Ray> rays;
     rays.reserve(polygons_.size() * 9);
     for (const auto& polygon : polygons_) {
         for (const auto& vertex : polygon.GetVertices()) {
-            const auto ray =
-                Ray(light_source_, vertex,
-                    std::atan2(vertex.y() - light_source_.y(), vertex.x() - light_source_.x()));
+            const auto ray = Ray(light, vertex, Utils::GetAngle(light, vertex));
             rays.emplace_back(ray);
-            rays.emplace_back(ray.Rotate(+.000'01));
-            rays.emplace_back(ray.Rotate(-.000'01));
+            rays.emplace_back(ray.Rotate(+.000'1));
+            rays.emplace_back(ray.Rotate(-.000'1));
         }
     }
     return std::move(rays);
@@ -88,8 +91,8 @@ void Controller::RemoveAdjacentRays(std::vector<Ray>* rays) {
     }
 }
 
-Polygon Controller::CreateLightArea() const {
-    auto rays = CastRays();
+Polygon Controller::CreateLightArea(const QPointF& light) const {
+    auto rays = CastRays(light);
     IntersectRays(&rays);
     RemoveAdjacentRays(&rays);
     Polygon light_area{};
@@ -104,4 +107,21 @@ void Controller::Scale(const QPointF& scale) {
         polygon.Scale(scale);
     }
     Utils::Scale(light_source_, scale);
+}
+
+bool Controller::IsTooClose(const QPointF& point, const double& k_max_dist) const {
+    for (const auto& polygon : polygons_) {
+        if (Utils::IsLess(polygon.GetDistance(point), k_max_dist)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+const double& Controller::GetLightRadius() const {
+    return kLightRadius;
+}
+
+const std::vector<QPointF>& Controller::GetDeltaLights() const {
+    return kDeltaLights;
 }

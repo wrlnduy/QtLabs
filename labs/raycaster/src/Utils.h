@@ -15,10 +15,14 @@ class Utils {
 
     static double GetDistance(const QPointF&, const QPointF&);
 
+    static double GetAngle(const QPointF&, const QPointF&);
+
     static void Scale(QPointF&, const QPointF&);
 
+    static double Sqr(const double&);
+
    private:
-    static constexpr double kEps = 1e-6;
+    static constexpr double kEps = 1e-9;
 };
 
 #endif  // UTILS_H

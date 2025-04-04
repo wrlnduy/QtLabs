@@ -4,6 +4,7 @@
 #include "Utils.h"
 
 #include <QPointF>
+#include <algorithm>
 #include <cmath>
 #include <cstddef>
 #include <limits>
@@ -17,11 +18,19 @@ const std::vector<QPointF>& Polygon::GetVertices() const {
     return vertices_;
 }
 
-QPointF Polygon::GetVertex(const size_t& ind) const {
+const QPointF& Polygon::GetVertex(const size_t& ind) const {
     if (ind == vertices_.size()) {
         return vertices_[0];
     }
     return vertices_.at(ind);
+}
+
+PolygonType Polygon::GetType() const {
+    return type_;
+}
+
+void Polygon::SetType(PolygonType type) {
+    type_ = type;
 }
 
 void Polygon::AddVertex(const QPointF& vertex) {
@@ -68,6 +77,48 @@ void Polygon::Scale(const QPointF& scale) {
     for (auto& vertex : vertices_) {
         Utils::Scale(vertex, scale);
     }
+}
+
+double Polygon::GetDistance(const QPointF& p) const {
+    double dist = 10'000.;
+    for (size_t i = 0; i < vertices_.size(); i++) {
+        const QPointF& a = vertices_[i];
+        const QPointF& b = GetVertex(i + 1);
+        const QPointF& AB = b - a;
+        const QPointF& AP = p - a;
+        const double t = QPointF::dotProduct(AB, AP) / (Utils::Sqr(AB.x()) + Utils::Sqr(AB.y()));
+        if (Utils::IsLess(t, .0) || Utils::IsMore(t, 1.)) {
+            dist = std::min(dist, Utils::GetDistance(p, a));
+            dist = std::min(dist, Utils::GetDistance(p, b));
+        } else {
+            dist = std::min(
+                dist,
+                (std::fabs((AB.y() * p.x()) - (AB.x() * p.y()) + b.x() * a.y() - b.y() * a.x())) /
+                    Utils::GetDistance(a, b));
+        }
+    }
+    return dist;
+}
+
+bool Polygon::ContainsPoint(const QPointF& p) const {
+    if (type_ == PolygonType::Creating) {
+        return false;
+    }
+
+    int intersections = 0;
+
+    for (size_t i = 0; i < vertices_.size(); i++) {
+        const QPointF& a = vertices_[i];
+        const QPointF& b = GetVertex(i + 1);
+
+        if (Utils::IsMore(a.y(), p.y()) != Utils::IsMore(b.y(), p.y())) {
+            const double x_intersect = a.x() + ((b.x() - a.x()) * (p.y() - a.y()) / (b.y() - a.y()));
+            if (Utils::IsLess(p.x(), x_intersect)) {
+                intersections++;
+            }
+        }
+    }
+    return (intersections % 2) == 1;
 }
 
 std::optional<QPointF> Polygon::FindIntersection(

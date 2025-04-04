@@ -41,6 +41,7 @@ class Raycaster final : public QMainWindow {
     void DrawPolygon(const Polygon&, const QPen&, const QBrush&) const;
     void DrawPolygons() const;
     void DrawLight() const;
+    void DrawLightArea() const;
     void MouseMovedLight(const QPointF&);
     void MousePressedPolygon(const QPointF&, Qt::MouseButton);
 };
