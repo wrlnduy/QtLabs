@@ -9,18 +9,13 @@ class Ray {
     Ray(const QPointF&, const QPointF&, const double&);
 
     void SetBegin(const QPointF&);
-
     [[nodiscard]] QPointF GetBegin() const;
-
     void SetEnd(const QPointF&);
-
     [[nodiscard]] QPointF GetEnd() const;
-
     void SetAngle(const double&);
-
     [[nodiscard]] double GetAngle() const;
-
     [[nodiscard]] Ray Rotate(const double&) const;
+    [[nodiscard]] Ray PushBegin(const double&);
 
    private:
     QPointF begin_{};

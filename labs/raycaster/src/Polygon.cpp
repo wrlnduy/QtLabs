@@ -112,7 +112,8 @@ bool Polygon::ContainsPoint(const QPointF& p) const {
         const QPointF& b = GetVertex(i + 1);
 
         if (Utils::IsMore(a.y(), p.y()) != Utils::IsMore(b.y(), p.y())) {
-            const double x_intersect = a.x() + ((b.x() - a.x()) * (p.y() - a.y()) / (b.y() - a.y()));
+            const double x_intersect =
+                a.x() + ((b.x() - a.x()) * (p.y() - a.y()) / (b.y() - a.y()));
             if (Utils::IsLess(p.x(), x_intersect)) {
                 intersections++;
             }
@@ -135,7 +136,8 @@ std::optional<QPointF> Polygon::FindIntersection(
     const double t = (diff.x() * edge_dir.y() - diff.y() * edge_dir.x()) / det;
     const double s = (diff.x() * ray_dir.y() - diff.y() * ray_dir.x()) / det;
 
-    if (!Utils::IsLess(t, .0) && !Utils::IsLess(s, .0) && !Utils::IsMore(s, 1.)) {
+    if (!Utils::IsLess(t, .0) && !Utils::IsMore(t, 1.) && !Utils::IsLess(s, .0) &&
+        !Utils::IsMore(s, 1.)) {
         return ray_begin + ray_dir * t;
     }
     return std::nullopt;

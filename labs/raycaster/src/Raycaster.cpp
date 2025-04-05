@@ -3,6 +3,7 @@
 #include "FPSCounter.h"
 #include "GraphicsView.h"
 #include "Polygon.h"
+#include "Utils.h"
 
 #include <QBrush>
 #include <QColorDialog>
@@ -21,7 +22,9 @@
 #include <QString>
 #include <QTimer>
 #include <QWidget>
+#include <cmath>
 #include <cstddef>
+#include <iterator>
 
 Raycaster::Raycaster(QWidget* parent) : QMainWindow(parent) {
     auto* central = new QWidget;
@@ -156,6 +159,7 @@ void Raycaster::MouseMoved(const QPointF& scene_pos) {
     switch (mode_) {
         case InputModes::Light:
             MouseMovedLight(scene_pos);
+            break;
         default:;
     }
 }
@@ -173,7 +177,11 @@ void Raycaster::MousePressed(const QPointF& scene_pos, Qt::MouseButton button) {
 }
 
 void Raycaster::Render() const {
+    scene_->clear();
     DrawPolygons();
+    if (mode_ == InputModes::Polygon) {
+        BuildingPolygon();
+    }
     DrawLightArea();
     DrawLight();
 }
@@ -248,6 +256,56 @@ void Raycaster::MouseMovedLight(const QPointF& scene_pos) {
     }
 }
 
+void Raycaster::BuildingPolygon() const {
+    const QPoint& view_pos = view_->mapFromGlobal(QCursor::pos());
+    const QPointF& scene_pos = view_->mapToScene(view_pos);
+    const int radius = 3;
+
+    QPainterPath path;
+    path.addEllipse(scene_pos, radius, radius);
+    auto last_vertex = scene_pos;
+    if (!controller_.GetPolygons().back().GetVertices().empty()) {
+        last_vertex = controller_.GetPolygons().back().GetVertices().back();
+        path.moveTo(last_vertex);
+        path.lineTo(scene_pos);
+    }
+    scene_->addPath(path, QPen(QColor(211, 211, 211, 128)), QBrush(QColor(0, 0, 0, 128)));
+
+    can_place_vertex_ = true;
+    const auto& polygons = controller_.GetPolygons();
+    for (int i = 1; i < std::ssize(polygons) - 1; i++) {
+        if (polygons[i].ContainsPoint(scene_pos)) {
+            can_place_vertex_ = false;
+            break;
+        }
+    }
+    if (!controller_.GetPolygons().back().GetVertices().empty() && can_place_vertex_) {
+        Ray ray(last_vertex, scene_pos, Utils::GetAngle(last_vertex, scene_pos));
+        for (int i = 0; i < std::ssize(polygons) - 1; i++) {
+            if (polygons[i].IntersectRay(ray).has_value()) {
+                can_place_vertex_ = false;
+                break;
+            }
+        }
+        if (can_place_vertex_) {
+            const double k_little_dist = 1e-8;
+            ray = ray.PushBegin(k_little_dist);
+            if (polygons.back().IntersectRay(ray).has_value()) {
+                can_place_vertex_ = false;
+            }
+        }
+    }
+    if (!can_place_vertex_) {
+        path.clear();
+        const double diagonal = std::sqrt(radius);
+        path.moveTo(scene_pos.x() - diagonal, scene_pos.y() - diagonal);
+        path.lineTo(scene_pos.x() + diagonal, scene_pos.y() + diagonal);
+        path.moveTo(scene_pos.x() - diagonal, scene_pos.y() + diagonal);
+        path.lineTo(scene_pos.x() + diagonal, scene_pos.y() - diagonal);
+        scene_->addPath(path, QPen(Qt::red));
+    }
+}
+
 void Raycaster::MousePressedPolygon(const QPointF& scene_pos, Qt::MouseButton button) {
     if (button == Qt::RightButton) {
         controller_.SetLastPolygonType(PolygonType::Finished);
@@ -255,6 +313,11 @@ void Raycaster::MousePressedPolygon(const QPointF& scene_pos, Qt::MouseButton bu
             controller_.RemoveLastPolygon();
         }
         controller_.AddPolygon({}, PolygonType::Creating);
+        return;
+    }
+    if (!can_place_vertex_) {
+        QMessageBox::warning(
+            this, ",jkmit yt ,eltn uhecnyj", "Placed inside of another polygon / self-crossed");
         return;
     }
     controller_.AddVertexToLastPolygon(scene_pos);

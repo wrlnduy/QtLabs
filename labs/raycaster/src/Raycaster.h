@@ -41,12 +41,15 @@ class Raycaster final : public QMainWindow {
 
     QTimer* refresh_timer_{};
 
+    mutable bool can_place_vertex_ = true;
+
     void Render() const;
     void DrawPolygon(const Polygon&, const QPen&, const QBrush&) const;
     void DrawPolygons() const;
     void DrawLight() const;
     void DrawLightArea() const;
     void MouseMovedLight(const QPointF&);
+    void BuildingPolygon() const;
     void MousePressedPolygon(const QPointF&, Qt::MouseButton);
     void MousePressedStaticLights(const QPointF&, Qt::MouseButton);
 };
