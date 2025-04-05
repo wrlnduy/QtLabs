@@ -25,7 +25,6 @@
 #include <QWidget>
 #include <cmath>
 #include <cstddef>
-#include <iterator>
 
 Raycaster::Raycaster(QWidget* parent) : QMainWindow(parent) {
     auto* central = new QWidget;
@@ -122,6 +121,22 @@ Raycaster::Raycaster(QWidget* parent) : QMainWindow(parent) {
         }
     });
 
+    const auto* swap_mode_shortcut = new QShortcut(QKeySequence("Tab"), this);
+    connect(swap_mode_shortcut, &QShortcut::activated, this, [this] {
+        switch (mode_) {
+            case InputModes::Light:
+                polygon_mode_->toggle();
+                break;
+            case InputModes::Polygon:
+                static_lights_mode_->toggle();
+                break;
+            case InputModes::StaticLights:
+                light_mode_->toggle();
+                break;
+            default:;
+        }
+    });
+
     refresh_timer_ = new QTimer;
     connect(refresh_timer_, &QTimer::timeout, this, [this] { Render(); });
     refresh_timer_->setTimerType(Qt::PreciseTimer);
@@ -200,13 +215,14 @@ void Raycaster::DrawPolygon(const Polygon& polygon, const QPen& pen, const QBrus
     switch (polygon.GetType()) {
         case PolygonType::Creating:
             path.addEllipse(vertices.back(), 2, 2);
+            scene_->addPath(path, pen);
             break;
         case PolygonType::Finished:
             path.closeSubpath();
+            scene_->addPath(path, pen, brush);
             break;
         default:;
     }
-    scene_->addPath(path, pen, brush);
 }
 
 void Raycaster::DrawPolygons() const {
@@ -216,7 +232,7 @@ void Raycaster::DrawPolygons() const {
 
     DrawPolygon(polygons[0], QPen(Qt::transparent), QBrush(Qt::black));
     for (size_t i = 1; i < polygons.size(); i++) {
-        DrawPolygon(polygons[i], QPen(Qt::gray), QBrush(Qt::transparent));
+        DrawPolygon(polygons[i], QPen(QColor(255, 77, 1)), QBrush(Qt::darkGray));
     }
 }
 
@@ -274,7 +290,7 @@ void Raycaster::BuildingPolygon() const {
     can_place_vertex_ = controller_.CanAddLastPolygonVertex(scene_pos);
     if (!can_place_vertex_) {
         path.clear();
-        const double diagonal = std::sqrt(radius);
+        const double diagonal = 2 * radius;
         path.moveTo(scene_pos.x() - diagonal, scene_pos.y() - diagonal);
         path.lineTo(scene_pos.x() + diagonal, scene_pos.y() + diagonal);
         path.moveTo(scene_pos.x() - diagonal, scene_pos.y() + diagonal);

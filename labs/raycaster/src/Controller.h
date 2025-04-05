@@ -52,7 +52,7 @@ class Controller {
     }();
 
     const size_t kMaxStaticLights = 20;
-    std::vector<std::pair<QPointF, QColor>> static_lights{};
+    std::vector<std::pair<QPointF, QColor>> static_lights_{};
 };
 
 #endif

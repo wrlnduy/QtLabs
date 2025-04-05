@@ -108,6 +108,9 @@ void Controller::Scale(const QPointF& scale) {
         polygon.Scale(scale);
     }
     Utils::Scale(light_source_, scale);
+    for (auto& [light, color] : static_lights_) {
+        Utils::Scale(light, scale);
+    }
 }
 
 bool Controller::IsTooClose(const QPointF& point, const double& k_max_dist) const {
@@ -128,15 +131,15 @@ const std::vector<QPointF>& Controller::GetDeltaLights() const {
 }
 
 const std::vector<std::pair<QPointF, QColor>>& Controller::GetStaticLights() const {
-    return static_lights;
+    return static_lights_;
 }
 
 bool Controller::StaticLightsOverflow() const {
-    return static_lights.size() == kMaxStaticLights;
+    return static_lights_.size() == kMaxStaticLights;
 }
 
 void Controller::AddStaticLight(const QPointF& light, const QColor& color) {
-    static_lights.emplace_back(light, color);
+    static_lights_.emplace_back(light, color);
 }
 
 bool Controller::CanPlaceLight(const QPointF& point) const {
@@ -157,7 +160,7 @@ bool Controller::CanPlaceLight(const QPointF& point) const {
 }
 
 void Controller::RemoveLastStaticLight() {
-    static_lights.pop_back();
+    static_lights_.pop_back();
 }
 
 bool Controller::CanAddLastPolygonVertex(const QPointF& point) const {
