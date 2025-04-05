@@ -3,6 +3,7 @@
 #include "FPSCounter.h"
 #include "GraphicsView.h"
 #include "Polygon.h"
+#include "Ray.h"
 #include "Utils.h"
 
 #include <QBrush>
@@ -215,7 +216,7 @@ void Raycaster::DrawPolygons() const {
 
     DrawPolygon(polygons[0], QPen(Qt::transparent), QBrush(Qt::black));
     for (size_t i = 1; i < polygons.size(); i++) {
-        DrawPolygon(polygons[i], QPen(Qt::gray), QBrush(Qt::black));
+        DrawPolygon(polygons[i], QPen(Qt::gray), QBrush(Qt::transparent));
     }
 }
 
@@ -270,31 +271,7 @@ void Raycaster::BuildingPolygon() const {
         path.lineTo(scene_pos);
     }
     scene_->addPath(path, QPen(QColor(211, 211, 211, 128)), QBrush(QColor(0, 0, 0, 128)));
-
-    can_place_vertex_ = true;
-    const auto& polygons = controller_.GetPolygons();
-    for (int i = 1; i < std::ssize(polygons) - 1; i++) {
-        if (polygons[i].ContainsPoint(scene_pos)) {
-            can_place_vertex_ = false;
-            break;
-        }
-    }
-    if (!controller_.GetPolygons().back().GetVertices().empty() && can_place_vertex_) {
-        Ray ray(last_vertex, scene_pos, Utils::GetAngle(last_vertex, scene_pos));
-        for (int i = 0; i < std::ssize(polygons) - 1; i++) {
-            if (polygons[i].IntersectRay(ray).has_value()) {
-                can_place_vertex_ = false;
-                break;
-            }
-        }
-        if (can_place_vertex_) {
-            const double k_little_dist = 1e-8;
-            ray = ray.PushBegin(k_little_dist);
-            if (polygons.back().IntersectRay(ray).has_value()) {
-                can_place_vertex_ = false;
-            }
-        }
-    }
+    can_place_vertex_ = controller_.CanAddLastPolygonVertex(scene_pos);
     if (!can_place_vertex_) {
         path.clear();
         const double diagonal = std::sqrt(radius);
@@ -308,6 +285,31 @@ void Raycaster::BuildingPolygon() const {
 
 void Raycaster::MousePressedPolygon(const QPointF& scene_pos, Qt::MouseButton button) {
     if (button == Qt::RightButton) {
+        can_place_vertex_ = true;
+        if (controller_.GetPolygons().back().GetVertices().size() > 2) {
+            const auto& last_edge_begin = controller_.GetPolygons().back().GetVertices().back();
+            const auto& last_edge_end = controller_.GetPolygons().back().GetVertex(0);
+            Ray ray(
+                last_edge_end, last_edge_begin, Utils::GetAngle(last_edge_end, last_edge_begin));
+            const double k_little_dist = 1e-8;
+            ray = ray.PushBegin(k_little_dist);
+            ray.SetEnd(ray.GetBegin());
+            ray.SetBegin(last_edge_begin);
+            ray.SetAngle(Utils::GetAngle(ray.GetBegin(), ray.GetEnd()));
+            ray = ray.PushBegin(k_little_dist);
+            for (const auto& polygon : controller_.GetPolygons()) {
+                if (polygon.IntersectRay(ray).has_value()) {
+                    can_place_vertex_ = false;
+                    break;
+                }
+            }
+        }
+        if (!can_place_vertex_) {
+            QMessageBox::warning(
+                this, ",jkmit yt ,eltn uhecnyj",
+                "After ending polygon will be self-crossing / cross another polygon");
+            return;
+        }
         controller_.SetLastPolygonType(PolygonType::Finished);
         if (controller_.GetPolygons().back().GetVertices().empty()) {
             controller_.RemoveLastPolygon();

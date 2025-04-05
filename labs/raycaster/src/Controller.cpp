@@ -144,7 +144,7 @@ bool Controller::CanPlaceLight(const QPointF& point) const {
     for (const auto& delta_light : kDeltaLights) {
         const auto light = delta_light + point;
         if (IsTooClose(light, kMaxDist) || !polygons_[0].ContainsPoint(light)) {
-            return false ;
+            return false;
         }
 
         for (size_t i = 1; i < polygons_.size(); i++) {
@@ -158,4 +158,32 @@ bool Controller::CanPlaceLight(const QPointF& point) const {
 
 void Controller::RemoveLastStaticLight() {
     static_lights.pop_back();
+}
+
+bool Controller::CanAddLastPolygonVertex(const QPointF& point) const {
+    bool can_place_vertex = true;
+    for (int i = 1; i < std::ssize(polygons_) - 1; i++) {
+        if (polygons_[i].ContainsPoint(point)) {
+            can_place_vertex = false;
+            break;
+        }
+    }
+    if (!polygons_.back().GetVertices().empty() && can_place_vertex) {
+        const auto& last_vertex = polygons_.back().GetVertices().back();
+        Ray ray(last_vertex, point, Utils::GetAngle(last_vertex, point));
+        for (int i = 0; i < std::ssize(polygons_) - 1; i++) {
+            if (polygons_[i].IntersectRay(ray).has_value()) {
+                can_place_vertex = false;
+                break;
+            }
+        }
+        if (can_place_vertex) {
+            const double k_little_dist = 1e-8;
+            ray = ray.PushBegin(k_little_dist);
+            if (polygons_.back().IntersectRay(ray).has_value()) {
+                can_place_vertex = false;
+            }
+        }
+    }
+    return can_place_vertex;
 }

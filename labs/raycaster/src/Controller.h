@@ -32,6 +32,7 @@ class Controller {
     void AddStaticLight(const QPointF&, const QColor& color = Qt::white);
     [[nodiscard]] bool CanPlaceLight(const QPointF&) const;
     void RemoveLastStaticLight();
+    [[nodiscard]] bool CanAddLastPolygonVertex(const QPointF&) const;
 
    private:
     std::vector<Polygon> polygons_{};

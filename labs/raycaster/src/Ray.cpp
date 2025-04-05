@@ -43,7 +43,7 @@ Ray Ray::Rotate(const double& angle) const {
     return {begin_, end, new_angle};
 }
 
-Ray Ray::PushBegin(const double& dist) {
+Ray Ray::PushBegin(const double& dist) const {
     const QPointF new_begin(
         begin_.x() + (dist * std::cos(angle_)), begin_.y() + (dist * std::sin(angle_)));
     return Ray(new_begin, end_, angle_);
