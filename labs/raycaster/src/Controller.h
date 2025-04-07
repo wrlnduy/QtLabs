@@ -38,7 +38,7 @@ class Controller {
     std::vector<Polygon> polygons_{};
     QPointF light_source_{};
     const double kLightRadius = 2;
-    const double kOrbitRadius = 7;
+    const double kOrbitRadius = 10;
     const double kNumSatellites = 9;
     const std::vector<QPointF> kDeltaLights = [&] {
         std::vector<QPointF> deltas;

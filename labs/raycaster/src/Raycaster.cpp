@@ -259,7 +259,7 @@ void Raycaster::DrawLightArea() const {
     for (const auto& delta_light : controller_.GetDeltaLights()) {
         const auto light = delta_light + controller_.GetLightSource();
         const auto light_area = controller_.CreateLightArea(light);
-        DrawPolygon(light_area, QPen(Qt::transparent), QBrush(QColor(75, 82, 82, 128)));
+        DrawPolygon(light_area, QPen(Qt::transparent), QBrush(QColor(255, 255, 255, 52)));
     }
     for (const auto& [light, color] : controller_.GetStaticLights()) {
         const auto& light_area = controller_.CreateLightArea(light);
