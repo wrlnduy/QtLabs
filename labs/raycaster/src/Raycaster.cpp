@@ -12,12 +12,15 @@
 #include <QGraphicsScene>
 #include <QGraphicsView>
 #include <QHBoxLayout>
+#include <QInputDialog>
 #include <QKeySequence>
 #include <QLabel>
 #include <QMainWindow>
 #include <QMessageBox>
 #include <QPainterPath>
 #include <QPen>
+#include <QPoint>
+#include <QRadialGradient>
 #include <QRadioButton>
 #include <QShortcut>
 #include <QString>
@@ -25,6 +28,7 @@
 #include <QWidget>
 #include <cmath>
 #include <cstddef>
+#include <tuple>
 
 Raycaster::Raycaster(QWidget* parent) : QMainWindow(parent) {
     auto* central = new QWidget;
@@ -244,7 +248,7 @@ void Raycaster::DrawLight() const {
         path.addEllipse(light, controller_.GetLightRadius(), controller_.GetLightRadius());
         scene_->addPath(path, QPen(Qt::darkRed), QBrush(Qt::darkRed));
     }
-    for (const auto& [light, color] : controller_.GetStaticLights()) {
+    for (const auto& [light, color, radius] : controller_.GetStaticLights()) {
         path.clear();
         path.addEllipse(light, controller_.GetLightRadius(), controller_.GetLightRadius());
         scene_->addPath(
@@ -261,9 +265,16 @@ void Raycaster::DrawLightArea() const {
         const auto light_area = controller_.CreateLightArea(light);
         DrawPolygon(light_area, QPen(Qt::transparent), QBrush(QColor(255, 255, 255, 52)));
     }
-    for (const auto& [light, color] : controller_.GetStaticLights()) {
+    for (const auto& [light, color, radius] : controller_.GetStaticLights()) {
         const auto& light_area = controller_.CreateLightArea(light);
-        DrawPolygon(light_area, QPen(Qt::transparent), QBrush(color));
+
+        QRadialGradient gradient(light, radius);
+        gradient.setColorAt(0, color);
+        QColor transparent_color = color;
+        transparent_color.setAlpha(0);
+        gradient.setColorAt(1, transparent_color);
+
+        DrawPolygon(light_area, QPen(Qt::transparent), QBrush(gradient));
     }
 }
 
@@ -357,7 +368,18 @@ void Raycaster::MousePressedStaticLights(const QPointF& scene_pos, Qt::MouseButt
     }
     refresh_timer_->stop();
     QColor color = QColorDialog::getColor(Qt::white, this, "Choose light color");
-    color.setAlpha(128);
-    controller_.AddStaticLight(scene_pos, color);
+    if (!color.isValid()) {
+        refresh_timer_->start();
+        return;
+    }
+    color.setAlpha(100);
+    bool ok{};
+    const int radius =
+        QInputDialog::getInt(this, "Enter radius", "Radius: ", 222, 0, INT_MAX, 1, &ok);
+    if (!ok) {
+        refresh_timer_->start();
+        return;
+    }
+    controller_.AddStaticLight(scene_pos, color, radius);
     refresh_timer_->start();
 }

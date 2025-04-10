@@ -8,6 +8,8 @@
 #include <QPointF>
 #include <algorithm>
 #include <cmath>
+#include <cstddef>
+#include <tuple>
 #include <utility>
 #include <vector>
 
@@ -108,7 +110,7 @@ void Controller::Scale(const QPointF& scale) {
         polygon.Scale(scale);
     }
     Utils::Scale(light_source_, scale);
-    for (auto& [light, color] : static_lights_) {
+    for (auto& [light, color, radius] : static_lights_) {
         Utils::Scale(light, scale);
     }
 }
@@ -130,7 +132,7 @@ const std::vector<QPointF>& Controller::GetDeltaLights() const {
     return kDeltaLights;
 }
 
-const std::vector<std::pair<QPointF, QColor>>& Controller::GetStaticLights() const {
+const std::vector<std::tuple<QPointF, QColor, int>>& Controller::GetStaticLights() const {
     return static_lights_;
 }
 
@@ -138,8 +140,8 @@ bool Controller::StaticLightsOverflow() const {
     return static_lights_.size() == kMaxStaticLights;
 }
 
-void Controller::AddStaticLight(const QPointF& light, const QColor& color) {
-    static_lights_.emplace_back(light, color);
+void Controller::AddStaticLight(const QPointF& light, const QColor& color, const int& radius) {
+    static_lights_.emplace_back(light, color, radius);
 }
 
 bool Controller::CanPlaceLight(const QPointF& point) const {

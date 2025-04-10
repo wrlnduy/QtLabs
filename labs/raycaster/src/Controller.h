@@ -27,9 +27,9 @@ class Controller {
     [[nodiscard]] bool IsTooClose(const QPointF&, const double& k_max_dist = 1e-9) const;
     [[nodiscard]] const double& GetLightRadius() const;
     [[nodiscard]] const std::vector<QPointF>& GetDeltaLights() const;
-    [[nodiscard]] const std::vector<std::pair<QPointF, QColor>>& GetStaticLights() const;
+    [[nodiscard]] const std::vector<std::tuple<QPointF, QColor, int>>& GetStaticLights() const;
     [[nodiscard]] bool StaticLightsOverflow() const;
-    void AddStaticLight(const QPointF&, const QColor& color = Qt::white);
+    void AddStaticLight(const QPointF&, const QColor& color = Qt::white, const int& radius = 1);
     [[nodiscard]] bool CanPlaceLight(const QPointF&) const;
     void RemoveLastStaticLight();
     [[nodiscard]] bool CanAddLastPolygonVertex(const QPointF&) const;
@@ -52,7 +52,7 @@ class Controller {
     }();
 
     const size_t kMaxStaticLights = 20;
-    std::vector<std::pair<QPointF, QColor>> static_lights_{};
+    std::vector<std::tuple<QPointF, QColor, int>> static_lights_{};
 };
 
 #endif
