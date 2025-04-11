@@ -28,6 +28,11 @@ bazel run raycaster --copt=-O3 --copt=-ffast-math
 
 #### Tab - следующий режим
 
+## Не баг, а фича
+
+1. Static light можно обрамить полигоном
+2. Полигон можно обрамить полигоном
+
 <details>
 <summary>P.s</summary>
 Норм история коммитов в ветке raycaster
