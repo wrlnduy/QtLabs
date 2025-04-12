@@ -219,14 +219,13 @@ void Raycaster::DrawPolygon(const Polygon& polygon, const QPen& pen, const QBrus
     switch (polygon.GetType()) {
         case PolygonType::Creating:
             path.addEllipse(vertices.back(), 2, 2);
-            scene_->addPath(path, pen);
             break;
         case PolygonType::Finished:
             path.closeSubpath();
-            scene_->addPath(path, pen, brush);
             break;
         default:;
     }
+    scene_->addPath(path, pen, brush);
 }
 
 void Raycaster::DrawPolygons() const {
@@ -235,8 +234,17 @@ void Raycaster::DrawPolygons() const {
     const auto& polygons = controller_.GetPolygons();
 
     DrawPolygon(polygons[0], QPen(Qt::transparent), QBrush(Qt::black));
-    for (size_t i = 1; i < polygons.size(); i++) {
-        DrawPolygon(polygons[i], QPen(QColor(255, 77, 1)), QBrush(Qt::darkGray));
+    for (size_t i = 1; i < polygons.size() - 1; i++) {
+        DrawPolygon(polygons[i], QPen(QColor(255, 77, 1)), QBrush(Qt::transparent));
+    }
+    switch (polygons.back().GetType()) {
+        case PolygonType::Creating:
+            DrawPolygon(polygons.back(), QPen(QColor(255, 77, 1)), QBrush(Qt::lightGray));
+            break;
+        case PolygonType::Finished:
+            DrawPolygon(polygons.back(), QPen(QColor(255, 77, 1)), QBrush(Qt::transparent));
+            break;
+        default: ;
     }
 }
 
