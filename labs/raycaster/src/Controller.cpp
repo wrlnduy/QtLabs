@@ -2,7 +2,7 @@
 
 #include "Polygon.h"
 #include "Ray.h"
-#include "Utils.h"
+#include "utils.h"
 
 #include <QColor>
 #include <QPointF>
@@ -51,7 +51,7 @@ std::vector<Ray> Controller::CastRays(const QPointF& light) const {
     rays.reserve(polygons_.size() * 9);
     for (const auto& polygon : polygons_) {
         for (const auto& vertex : polygon.GetVertices()) {
-            const auto ray = Ray(light, vertex, Utils::GetAngle(light, vertex));
+            const auto ray = Ray(light, vertex, utils::GetAngle(light, vertex));
             rays.emplace_back(ray);
             rays.emplace_back(ray.Rotate(+.000'1));
             rays.emplace_back(ray.Rotate(-.000'1));
@@ -70,8 +70,8 @@ void Controller::IntersectRays(std::vector<Ray>* rays) const {
             const auto& begin = ray.GetBegin();
             const auto& end = ray.GetEnd();
             const auto& new_end = intersection.value();
-            if (!Utils::IsLess(
-                    Utils::GetDistance(begin, new_end), Utils::GetDistance(begin, end))) {
+            if (!utils::IsLess(
+                    utils::GetDistance(begin, new_end), utils::GetDistance(begin, end))) {
                 continue;
             }
             ray.SetEnd(new_end);
@@ -81,11 +81,11 @@ void Controller::IntersectRays(std::vector<Ray>* rays) const {
 
 void Controller::RemoveAdjacentRays(std::vector<Ray>* rays) {
     std::ranges::sort(*rays, [](const auto& lhs, const auto& rhs) {
-        return Utils::IsLess(lhs.GetAngle(), rhs.GetAngle());
+        return utils::IsLess(lhs.GetAngle(), rhs.GetAngle());
     });
     int new_end = 1;
     for (int i = 1; i < std::ssize(*rays); i++) {
-        if (!Utils::IsEqual((*rays)[i].GetEnd(), (*rays)[i - 1].GetEnd())) {
+        if (!utils::IsEqual((*rays)[i].GetEnd(), (*rays)[i - 1].GetEnd())) {
             (*rays)[new_end++] = (*rays)[i];
         }
     }
@@ -109,15 +109,15 @@ void Controller::Scale(const QPointF& scale) {
     for (auto& polygon : polygons_) {
         polygon.Scale(scale);
     }
-    Utils::Scale(light_source_, scale);
+    utils::Scale(light_source_, scale);
     for (auto& [light, color, radius] : static_lights_) {
-        Utils::Scale(light, scale);
+        utils::Scale(light, scale);
     }
 }
 
 bool Controller::IsTooClose(const QPointF& point, const double& k_max_dist) const {
     for (const auto& polygon : polygons_) {
-        if (Utils::IsLess(polygon.GetDistance(point), k_max_dist)) {
+        if (utils::IsLess(polygon.GetDistance(point), k_max_dist)) {
             return true;
         }
     }
@@ -175,7 +175,7 @@ bool Controller::CanAddLastPolygonVertex(const QPointF& point) const {
     }
     if (!polygons_.back().GetVertices().empty() && can_place_vertex) {
         const auto& last_vertex = polygons_.back().GetVertices().back();
-        Ray ray(last_vertex, point, Utils::GetAngle(last_vertex, point));
+        Ray ray(last_vertex, point, utils::GetAngle(last_vertex, point));
         for (int i = 0; i < std::ssize(polygons_) - 1; i++) {
             if (polygons_[i].IntersectRay(ray).has_value()) {
                 can_place_vertex = false;

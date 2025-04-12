@@ -4,7 +4,7 @@
 #include "GraphicsView.h"
 #include "Polygon.h"
 #include "Ray.h"
-#include "Utils.h"
+#include "utils.h"
 
 #include <QBrush>
 #include <QColorDialog>
@@ -325,12 +325,12 @@ void Raycaster::MousePressedPolygon(const QPointF& scene_pos, Qt::MouseButton bu
             const auto& last_edge_begin = controller_.GetPolygons().back().GetVertices().back();
             const auto& last_edge_end = controller_.GetPolygons().back().GetVertex(0);
             Ray ray(
-                last_edge_end, last_edge_begin, Utils::GetAngle(last_edge_end, last_edge_begin));
+                last_edge_end, last_edge_begin, utils::GetAngle(last_edge_end, last_edge_begin));
             const double k_little_dist = 1e-8;
             ray = ray.PushBegin(k_little_dist);
             ray.SetEnd(ray.GetBegin());
             ray.SetBegin(last_edge_begin);
-            ray.SetAngle(Utils::GetAngle(ray.GetBegin(), ray.GetEnd()));
+            ray.SetAngle(utils::GetAngle(ray.GetBegin(), ray.GetEnd()));
             ray = ray.PushBegin(k_little_dist);
             for (const auto& polygon : controller_.GetPolygons()) {
                 if (polygon.IntersectRay(ray).has_value()) {

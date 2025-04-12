@@ -1,6 +1,6 @@
 #include "Ray.h"
 
-#include "Utils.h"
+#include "utils.h"
 
 #include <QPointF>
 #include <cmath>
@@ -19,7 +19,7 @@ QPointF Ray::GetBegin() const {
 
 void Ray::SetEnd(const QPointF& end) {
     end_ = end;
-    angle_ = Utils::GetAngle(begin_, end_);
+    angle_ = utils::GetAngle(begin_, end_);
 }
 
 QPointF Ray::GetEnd() const {

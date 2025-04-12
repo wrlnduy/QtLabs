@@ -1,7 +1,7 @@
 #include "Polygon.h"
 
 #include "Ray.h"
-#include "Utils.h"
+#include "utils.h"
 
 #include <QPointF>
 #include <algorithm>
@@ -58,7 +58,7 @@ std::optional<QPointF> Polygon::IntersectRay(const Ray& ray) const {
             const double dist = std::hypot(
                 intersection.value().x() - ray.GetBegin().x(),
                 intersection.value().y() - ray.GetBegin().y());
-            if (Utils::IsLess(dist, min_dist)) {
+            if (utils::IsLess(dist, min_dist)) {
                 min_dist = dist;
                 closest = intersection.value();
                 found = true;
@@ -75,7 +75,7 @@ std::optional<QPointF> Polygon::IntersectRay(const Ray& ray) const {
 
 void Polygon::Scale(const QPointF& scale) {
     for (auto& vertex : vertices_) {
-        Utils::Scale(vertex, scale);
+        utils::Scale(vertex, scale);
     }
 }
 
@@ -86,15 +86,15 @@ double Polygon::GetDistance(const QPointF& p) const {
         const QPointF& b = GetVertex(i + 1);
         const QPointF& AB = b - a;
         const QPointF& AP = p - a;
-        const double t = QPointF::dotProduct(AB, AP) / (Utils::Sqr(AB.x()) + Utils::Sqr(AB.y()));
-        if (Utils::IsLess(t, .0) || Utils::IsMore(t, 1.)) {
-            dist = std::min(dist, Utils::GetDistance(p, a));
-            dist = std::min(dist, Utils::GetDistance(p, b));
+        const double t = QPointF::dotProduct(AB, AP) / (utils::Sqr(AB.x()) + utils::Sqr(AB.y()));
+        if (utils::IsLess(t, .0) || utils::IsMore(t, 1.)) {
+            dist = std::min(dist, utils::GetDistance(p, a));
+            dist = std::min(dist, utils::GetDistance(p, b));
         } else {
             dist = std::min(
                 dist,
                 (std::fabs((AB.y() * p.x()) - (AB.x() * p.y()) + b.x() * a.y() - b.y() * a.x())) /
-                    Utils::GetDistance(a, b));
+                    utils::GetDistance(a, b));
         }
     }
     return dist;
@@ -111,10 +111,10 @@ bool Polygon::ContainsPoint(const QPointF& p) const {
         const QPointF& a = vertices_[i];
         const QPointF& b = GetVertex(i + 1);
 
-        if (Utils::IsMore(a.y(), p.y()) != Utils::IsMore(b.y(), p.y())) {
+        if (utils::IsMore(a.y(), p.y()) != utils::IsMore(b.y(), p.y())) {
             const double x_intersect =
                 a.x() + ((b.x() - a.x()) * (p.y() - a.y()) / (b.y() - a.y()));
-            if (Utils::IsLess(p.x(), x_intersect)) {
+            if (utils::IsLess(p.x(), x_intersect)) {
                 intersections++;
             }
         }
@@ -128,7 +128,7 @@ std::optional<QPointF> Polygon::FindIntersection(
     const QPointF edge_dir = edge_end - edge_begin;
     const double det = (ray_dir.x() * edge_dir.y()) - (ray_dir.y() * edge_dir.x());
 
-    if (Utils::IsEqual(det, .0)) {
+    if (utils::IsEqual(det, .0)) {
         return std::nullopt;
     }
 
@@ -136,8 +136,8 @@ std::optional<QPointF> Polygon::FindIntersection(
     const double t = (diff.x() * edge_dir.y() - diff.y() * edge_dir.x()) / det;
     const double s = (diff.x() * ray_dir.y() - diff.y() * ray_dir.x()) / det;
 
-    if (!Utils::IsLess(t, .0) && !Utils::IsMore(t, 1.) && !Utils::IsLess(s, .0) &&
-        !Utils::IsMore(s, 1.)) {
+    if (!utils::IsLess(t, .0) && !utils::IsMore(t, 1.) && !utils::IsLess(s, .0) &&
+        !utils::IsMore(s, 1.)) {
         return ray_begin + ray_dir * t;
     }
     return std::nullopt;
