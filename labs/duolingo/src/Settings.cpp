@@ -4,20 +4,20 @@
 #include "TaskDifficulty.h"
 
 void Settings::SetTaskDifficulty(const TaskDifficulty& difficulty) {
-    settings.setValue("TaskDifficulty", static_cast<int>(difficulty));
+    settings_.setValue("TaskDifficulty", static_cast<int>(difficulty));
+    emit DifficultyChanged(difficulty);
 }
 
-TaskDifficulty Settings::GetTaskDifficulty() {
-    const auto& difficulty = settings.value("TaskDifficulty", 0).toInt();
+TaskDifficulty Settings::GetTaskDifficulty() const {
+    const auto& difficulty = settings_.value("TaskDifficulty", 0).toInt();
     return static_cast<TaskDifficulty>(difficulty);
 }
 
 void Settings::SetExerciseType(const ExerciseType& exercise) {
-    settings.setValue("ExerciseType", static_cast<int>(exercise));
+    settings_.setValue("ExerciseType", static_cast<int>(exercise));
 }
 
-
-ExerciseType Settings::GetExerciseType() {
-    const auto& exercise = settings.value("ExerciseType", 0).toInt();
+ExerciseType Settings::GetExerciseType() const {
+    const auto& exercise = settings_.value("ExerciseType", 0).toInt();
     return static_cast<ExerciseType>(exercise);
 }

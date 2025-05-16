@@ -1,8 +1,11 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "Settings.h"
+
 #include <QMainWindow>
 #include <QStackedWidget>
+#include <memory>
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
@@ -11,6 +14,9 @@ class MainWindow : public QMainWindow {
 
    private slots:
     void ShowHelpMessage();
+
+   private:
+    std::shared_ptr<Settings> settings_{};
 };
 
 #endif  // MAINWINDOW_H

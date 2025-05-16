@@ -4,17 +4,23 @@
 #include "ExerciseTypes.h"
 #include "TaskDifficulty.h"
 
+#include <QObject>
 #include <QSettings>
 
-namespace Settings {
-inline QSettings settings{};
+class Settings : public QObject {
+    Q_OBJECT
+   public:
+    void SetTaskDifficulty(const TaskDifficulty&);
+    [[nodiscard]] TaskDifficulty GetTaskDifficulty() const;
 
-void SetTaskDifficulty(const TaskDifficulty&);
-[[nodiscard]] TaskDifficulty GetTaskDifficulty();
+    void SetExerciseType(const ExerciseType&);
+    [[nodiscard]] ExerciseType GetExerciseType() const;
 
-void SetExerciseType(const ExerciseType&);
-[[nodiscard]] ExerciseType GetExerciseType();
+   signals:
+    void DifficultyChanged(TaskDifficulty difficulty) const;
 
-};  // namespace Settings
+   private:
+    QSettings settings_{};
+};
 
 #endif  // SETTINGS_H
