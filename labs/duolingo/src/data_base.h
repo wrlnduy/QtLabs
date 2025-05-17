@@ -8,9 +8,9 @@
 #include <memory>
 #include <vector>
 
-namespace DataBase {
+namespace data_base {
 
-const int kQuestions = 30;
+constexpr int kQuestions = 30;
 
 struct GrammarTask {
     std::unique_ptr<QString> question{};
@@ -23,7 +23,7 @@ struct TranslationTask {
     std::unique_ptr<QString> answer{};
 };
 
-inline const std::vector<std::vector<QString>> grammar_questions = {
+inline const std::vector<std::vector<QString>> kGrammarQuestions = {
   {
     QString("She ___ a cat."),
     QString("My brother ___ in London last year."),
@@ -121,7 +121,7 @@ inline const std::vector<std::vector<QString>> grammar_questions = {
     QString("The project ___ by the team before the deadline next week."),
   }};
 
-inline const std::vector<std::vector<std::vector<QString>>> grammar_options = {
+inline const std::vector<std::vector<std::vector<QString>>> kGrammarOptions = {
   {
     {QString("having"), QString("has"), QString("had"), QString("have")},
     {QString("living"), QString("lived"), QString("lives"), QString("live")},
@@ -230,12 +230,12 @@ inline const std::vector<std::vector<std::vector<QString>>> grammar_options = {
      QString("will complete")},
   }};
 
-inline const std::vector<std::vector<int>> grammar_answers = {
+inline const std::vector<std::vector<int>> kGrammarAnswers = {
   {1, 1, 3, 3, 2, 2, 0, 2, 3, 2, 1, 3, 0, 3, 1, 1, 1, 0, 3, 1, 0, 2, 0, 1, 1, 2, 1, 2, 0, 2},
   {2, 0, 1, 2, 1, 3, 2, 0, 1, 2, 1, 3, 3, 0, 3, 3, 0, 3, 3, 0, 2, 1, 1, 3, 0, 1, 3, 1, 0, 0},
   {0, 1, 0, 3, 2, 0, 1, 1, 1, 2, 0, 3, 1, 3, 3, 2, 3, 3, 1, 3, 3, 3, 1, 0, 1, 1, 1, 3, 2, 0}};
 
-inline const std::vector<std::vector<QString>> translation_questions = {
+inline const std::vector<std::vector<QString>> kTranslationQuestions = {
   {
     QString("cat"),      QString("dog"),    QString("house"),  QString("car"),
     QString("book"),     QString("table"),  QString("water"),  QString("tree"),
@@ -309,10 +309,9 @@ inline const std::vector<std::vector<QString>> translation_questions = {
     QString("Too little, too late."),
     QString("Beauty is in the eye of the beholder."),
     QString("Absence makes the heart grow fonder."),
-  }
-};
+  }};
 
-inline const std::vector<std::vector<QString>> translations_answers = {
+inline const std::vector<std::vector<QString>> kTranslationsAnswers = {
   {
     QString("кот"),       QString("собака"),  QString("дом"),    QString("машина"),
     QString("книга"),     QString("стол"),    QString("вода"),   QString("дерево"),
@@ -386,25 +385,24 @@ inline const std::vector<std::vector<QString>> translations_answers = {
     QString("Слишком мало, слишком поздно."),
     QString("Красота в глазах смотрящего."),
     QString("Разлука укрепляет чувства."),
-  }
-};
+  }};
 
 inline std::unique_ptr<GrammarTask> GetGrammarTask(TaskDifficulty difficulty, const int& id) {
     const int difficulty_id = static_cast<int>(difficulty);
     return std::make_unique<GrammarTask>(
-        std::make_unique<QString>(grammar_questions[difficulty_id][id]),
-        std::make_unique<std::vector<QString>>(grammar_options[difficulty_id][id]),
-        std::make_unique<int>(grammar_answers[difficulty_id][id]));
+        std::make_unique<QString>(kGrammarQuestions.at(difficulty_id).at(id)),
+        std::make_unique<std::vector<QString>>(kGrammarOptions.at(difficulty_id).at(id)),
+        std::make_unique<int>(kGrammarAnswers.at(difficulty_id).at(id)));
 }
 
 inline std::unique_ptr<TranslationTask> GetTranslationTask(
     TaskDifficulty difficulty, const int& id) {
     const int difficulty_id = static_cast<int>(difficulty);
     return std::make_unique<TranslationTask>(
-        std::make_unique<QString>(translation_questions[difficulty_id][id]),
-        std::make_unique<QString>(translations_answers[difficulty_id][id]));
+        std::make_unique<QString>(kTranslationQuestions[difficulty_id][id]),
+        std::make_unique<QString>(kTranslationsAnswers[difficulty_id][id]));
 }
 
-}  // namespace DataBase
+}  // namespace data_base
 
 #endif  // DATABASE_H

@@ -1,6 +1,6 @@
 #include "TranslationView.h"
 
-#include "DataBase.h"
+#include "data_base.h"
 
 #include <QLabel>
 #include <QLineEdit>
@@ -24,7 +24,7 @@ TranslationView::TranslationView(QWidget* parent)
 }
 
 void TranslationView::SetTask(TaskDifficulty difficulty, const int& taskId) {
-    const auto task = DataBase::GetTranslationTask(difficulty, taskId);
+    const auto task = data_base::GetTranslationTask(difficulty, taskId);
     question_label_->setText(*task->question);
     correct_answer_ = *task->answer;
     input_field_->clear();
@@ -35,8 +35,7 @@ void TranslationView::Submit() {
     if (userText.isEmpty()) {
         return;
     }
-
-    if (userText == correct_answer_) {
+    if (userText.toLower() == correct_answer_.toLower()) {
         emit Accepted();
     } else {
         emit WrongAnswer();

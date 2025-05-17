@@ -13,7 +13,7 @@
 #include <QTimer>
 #include <QWidget>
 
-constexpr int kExerciseDuration = 200 * 1000;
+constexpr int kExerciseDuration = 150 * 1000;
 constexpr int kMistakes = 3;
 constexpr int kTasksInSet = 5;
 
@@ -22,11 +22,17 @@ class TaskView : public QWidget {
    public:
     explicit TaskView(const std::shared_ptr<Settings>&, QWidget* parent = nullptr);
 
-    void SetExercise(const ExerciseType&, const TaskDifficulty&);
+    void SetExercise(const ExerciseType&);
+
+   signals:
+    void ExerciseChanged(int);
+    void WA();
+    void AC();
 
    private slots:
     void HandleAccepted();
     void HandleWrongAnswer();
+    void HandleTimeout();
 
    private:
     QStackedWidget* stacked_widget_ = nullptr;
@@ -39,8 +45,7 @@ class TaskView : public QWidget {
     QLabel* timer_label_ = nullptr;
 
     ExerciseType exercise_type_;
-    TaskDifficulty task_difficulty_;
-    std::vector<int> task_ids{};
+    std::vector<int> task_ids_{};
 
     std::shared_ptr<Settings> settings_{};
 

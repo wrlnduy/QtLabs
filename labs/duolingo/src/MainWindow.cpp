@@ -93,6 +93,16 @@ MainWindow::MainWindow(QWidget* parent)
 
     main_layout->addWidget(stacked_widget_);
 
+    connect(task_view_, &TaskView::ExerciseChanged, this, &MainWindow::ExerciseChanged);
+    connect(task_view_, &TaskView::WA, this, [this] { audio_player_->PlaySound(Sound::Fail); });
+    connect(task_view_, &TaskView::AC, this, [this] { audio_player_->PlaySound(Sound::Success); });
+
+    auto* clear_stats_shortcut = new QShortcut(QKeySequence("Meta+R"), this);
+    connect(clear_stats_shortcut, &QShortcut::activated, this, [this] {
+        settings_->ClearDoneTasks();
+        settings_->SetScore(0);
+    });
+
     central->setLayout(main_layout);
 }
 
@@ -125,6 +135,7 @@ void MainWindow::ShowHelpMessage() {
 
 void MainWindow::ExerciseChanged(const int& new_exercise_id) const {
     const auto exercise = static_cast<ExerciseType>(new_exercise_id);
+    exercise_combo_box_->setCurrentIndex(new_exercise_id);
     if (exercise == ExerciseType::Chill) {
         SetChill();
     } else {
@@ -139,6 +150,6 @@ void MainWindow::SetChill() const {
 
 void MainWindow::SetTask(const ExerciseType exercise) const {
     stacked_widget_->setCurrentWidget(task_view_);
-    task_view_->SetExercise(exercise, settings_->GetTaskDifficulty());
+    task_view_->SetExercise(exercise);
     audio_player_->Shutdown();
 }

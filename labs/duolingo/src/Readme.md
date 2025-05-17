@@ -8,3 +8,4 @@
 ### Shortcuts
 + **Ctrl+H** : Вызвать Помощь
 + **Enter**: В заданиях - submit
++ **Win/Super/Command + R** - очистить прогресс

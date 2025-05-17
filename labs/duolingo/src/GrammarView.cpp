@@ -1,6 +1,7 @@
 #include "GrammarView.h"
 
-#include "DataBase.h"
+#include "TaskDifficulty.h"
+#include "data_base.h"
 
 #include <QButtonGroup>
 #include <QKeySequence>
@@ -38,7 +39,7 @@ GrammarView::GrammarView(QWidget* parent)
 }
 
 void GrammarView::SetTask(TaskDifficulty difficulty, const int& task_id) {
-    const auto task = DataBase::GetGrammarTask(difficulty, task_id);
+    const auto task = data_base::GetGrammarTask(difficulty, task_id);
     question_->setText(*task->question);
     for (int i = 0; i < 4; i++) {
         options_[i]->setText((*task->options)[i]);

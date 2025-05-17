@@ -1,9 +1,11 @@
 #include "TaskView.h"
 
-#include "DataBase.h"
 #include "ExerciseTypes.h"
 #include "GrammarView.h"
+#include "Settings.h"
+#include "TaskDifficulty.h"
 #include "TranslationView.h"
+#include "data_base.h"
 
 #include <QLabel>
 #include <QMessageBox>
@@ -13,6 +15,7 @@
 #include <QTimer>
 #include <QVBoxLayout>
 #include <QWidget>
+#include <memory>
 
 TaskView::TaskView(const std::shared_ptr<Settings>& settings, QWidget* parent)
     : QWidget(parent)
@@ -22,8 +25,8 @@ TaskView::TaskView(const std::shared_ptr<Settings>& settings, QWidget* parent)
     , progress_bar_(new QProgressBar(this))
     , exercise_timer_(new QTimer(this))
     , refresh_timer_(new QTimer(this))
-    , timer_label_(new QLabel(QString("Осталось времени:...с"), this)) {
-    settings_ = settings;
+    , timer_label_(new QLabel(QString("Осталось времени:...с"), this))
+    , settings_(settings) {
     stacked_widget_->addWidget(grammar_view_);
     stacked_widget_->addWidget(translation_view_);
 
@@ -33,6 +36,8 @@ TaskView::TaskView(const std::shared_ptr<Settings>& settings, QWidget* parent)
     info_layout->addWidget(progress_bar_);
     info_layout->addWidget(timer_label_);
     exercise_timer_->setTimerType(Qt::PreciseTimer);
+    exercise_timer_->setSingleShot(true);
+    connect(exercise_timer_, &QTimer::timeout, this, &TaskView::HandleTimeout);
     refresh_timer_->setTimerType(Qt::PreciseTimer);
     exercise_timer_->setInterval(kExerciseDuration);
     refresh_timer_->setInterval(10);
@@ -57,39 +62,55 @@ TaskView::TaskView(const std::shared_ptr<Settings>& settings, QWidget* parent)
     connect(grammar_view_, &GrammarView::Accepted, this, &TaskView::HandleAccepted);
     connect(grammar_view_, &GrammarView::WrongAnswer, this, &TaskView::HandleWrongAnswer);
 
-    // connect(translation_view_, &TranslationView::Accepted, this, &TaskView::HandleAccepted);
-    // connect(translation_view_, &TranslationView::WrongAnswer, this, &TaskView::HandleWrongAnswer);
+    connect(translation_view_, &TranslationView::Accepted, this, &TaskView::HandleAccepted);
+    connect(translation_view_, &TranslationView::WrongAnswer, this, &TaskView::HandleWrongAnswer);
 }
 
 void TaskView::HandleAccepted() {
+    emit AC();
     progress_bar_->setValue(progress_bar_->value() + 1);
     LoadNext();
 }
 
 void TaskView::HandleWrongAnswer() {
+    emit WA();
+    QMessageBox::warning(
+        this, QString("Неправильный ответ"), QString("Неправильный вариант ответа"));
     ++mistakes_;
     if (mistakes_ == kMistakes) {
+        exercise_timer_->stop();
+        refresh_timer_->stop();
+        QMessageBox::warning(
+            this, QString("Попытки закончились"), QString("Слишком много ошибок. Отдохни и возвращайся"));
+        emit ExerciseChanged(static_cast<int>(ExerciseType::Chill));
     }
-    LoadNext();
 }
 
-void TaskView::SetExercise(const ExerciseType& exercise, const TaskDifficulty& difficulty) {
-    // FindTasks();
+void TaskView::HandleTimeout() {
+    emit WA();
+    QMessageBox::warning(this, tr("Время вышло"), tr("Время на выполнение упражнения истекло"));
+    exercise_timer_->stop();
+    refresh_timer_->stop();
+    emit ExerciseChanged(static_cast<int>(ExerciseType::Chill));
+}
+
+void TaskView::SetExercise(const ExerciseType& exercise) {
+    FindTasks();
     if (exercise == ExerciseType::Grammar) {
         stacked_widget_->setCurrentWidget(grammar_view_);
-        // grammar_view_->SetTask(task_difficulty_, task_ids.back());
+        grammar_view_->SetTask(settings_->GetTaskDifficulty(), task_ids_.back());
     } else {
         stacked_widget_->setCurrentWidget(translation_view_);
+        translation_view_->SetTask(settings_->GetTaskDifficulty(), task_ids_.back());
     }
     RefreshStats();
     exercise_timer_->start();
     exercise_type_ = exercise;
-    task_difficulty_ = difficulty;
 }
 
 void TaskView::FindTasks() {
-    task_ids = settings_->GetUnusedTasks(
-        static_cast<int>(exercise_type_), static_cast<int>(task_difficulty_));
+    task_ids_ = settings_->GetUnusedTasks(
+        static_cast<int>(exercise_type_), static_cast<int>(settings_->GetTaskDifficulty()));
 }
 
 void TaskView::RefreshStats() {
@@ -100,16 +121,32 @@ void TaskView::RefreshStats() {
 }
 
 void TaskView::LoadNext() {
-    if (task_ids.empty()) {
+    settings_->MarkTaskDone(
+        static_cast<int>(exercise_type_), static_cast<int>(settings_->GetTaskDifficulty()),
+        QString::number(task_ids_.back()));
+    switch (settings_->GetTaskDifficulty()) {
+        case TaskDifficulty::Easy:
+            settings_->AddScore(10);
+            break;
+        case TaskDifficulty::Medium:
+            settings_->AddScore(20);
+            break;
+        case TaskDifficulty::Hard:
+            settings_->AddScore(30);
+            break;
+        default:;
+    }
+    task_ids_.pop_back();
+    if (task_ids_.empty()) {
         QMessageBox::information(this, QString("Победа"), QString("Задание выполнено!"));
-        FindTasks();
+        exercise_timer_->stop();
+        refresh_timer_->stop();
+        emit ExerciseChanged(static_cast<int>(ExerciseType::Chill));
+        return;
     }
-    int next = task_ids.back();
-    task_ids.pop_back();
     if (exercise_type_ == ExerciseType::Grammar) {
-        grammar_view_->SetTask(task_difficulty_, next);
+        grammar_view_->SetTask(settings_->GetTaskDifficulty(), task_ids_.back());
     } else {
-        // translation_view_->SetTask(task_difficulty_, next);
+        translation_view_->SetTask(settings_->GetTaskDifficulty(), task_ids_.back());
     }
-    exercise_timer_->start();
 }

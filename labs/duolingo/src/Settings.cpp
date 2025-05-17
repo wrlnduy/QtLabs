@@ -1,8 +1,8 @@
 #include "Settings.h"
 
-#include "DataBase.h"
 #include "ExerciseTypes.h"
 #include "TaskDifficulty.h"
+#include "data_base.h"
 
 #include <random>
 
@@ -56,8 +56,8 @@ std::vector<int> Settings::GetUnusedTasks(const int type, const int diff) const 
     QStringList done = GetDoneTasks(type, diff);
 
     std::vector<int> unused;
-    unused.reserve(DataBase::kQuestions);
-    for (int i = 0; i < DataBase::kQuestions; i++) {
+    unused.reserve(data_base::kQuestions);
+    for (int i = 0; i < data_base::kQuestions; i++) {
         if (!done.contains(QString::number(i))) {
             unused.push_back(i);
         }
