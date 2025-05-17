@@ -101,6 +101,7 @@ MainWindow::MainWindow(QWidget* parent)
     connect(clear_stats_shortcut, &QShortcut::activated, this, [this] {
         settings_->ClearDoneTasks();
         settings_->SetScore(0);
+        ExerciseChanged(exercise_combo_box_->currentIndex());
     });
 
     central->setLayout(main_layout);

@@ -81,7 +81,8 @@ void TaskView::HandleWrongAnswer() {
         exercise_timer_->stop();
         refresh_timer_->stop();
         QMessageBox::warning(
-            this, QString("Попытки закончились"), QString("Слишком много ошибок. Отдохни и возвращайся"));
+            this, QString("Попытки закончились"),
+            QString("Слишком много ошибок. Отдохни и возвращайся"));
         emit ExerciseChanged(static_cast<int>(ExerciseType::Chill));
     }
 }
@@ -98,10 +99,10 @@ void TaskView::SetExercise(const ExerciseType& exercise) {
     FindTasks();
     if (exercise == ExerciseType::Grammar) {
         stacked_widget_->setCurrentWidget(grammar_view_);
-        grammar_view_->SetTask(settings_->GetTaskDifficulty(), task_ids_.back());
+        grammar_view_->SetTask(settings_->GetTaskDifficulty(), task_ids_[task_id_ind_]);
     } else {
         stacked_widget_->setCurrentWidget(translation_view_);
-        translation_view_->SetTask(settings_->GetTaskDifficulty(), task_ids_.back());
+        translation_view_->SetTask(settings_->GetTaskDifficulty(), task_ids_[task_id_ind_]);
     }
     RefreshStats();
     exercise_timer_->start();
@@ -111,6 +112,7 @@ void TaskView::SetExercise(const ExerciseType& exercise) {
 void TaskView::FindTasks() {
     task_ids_ = settings_->GetUnusedTasks(
         static_cast<int>(exercise_type_), static_cast<int>(settings_->GetTaskDifficulty()));
+    task_id_ind_ = 0;
 }
 
 void TaskView::RefreshStats() {
@@ -121,32 +123,34 @@ void TaskView::RefreshStats() {
 }
 
 void TaskView::LoadNext() {
-    settings_->MarkTaskDone(
-        static_cast<int>(exercise_type_), static_cast<int>(settings_->GetTaskDifficulty()),
-        QString::number(task_ids_.back()));
-    switch (settings_->GetTaskDifficulty()) {
-        case TaskDifficulty::Easy:
-            settings_->AddScore(10);
-            break;
-        case TaskDifficulty::Medium:
-            settings_->AddScore(20);
-            break;
-        case TaskDifficulty::Hard:
-            settings_->AddScore(30);
-            break;
-        default:;
-    }
-    task_ids_.pop_back();
-    if (task_ids_.empty()) {
+    ++task_id_ind_;
+    if (task_id_ind_ == kTasksInSet) {
         QMessageBox::information(this, QString("Победа"), QString("Задание выполнено!"));
         exercise_timer_->stop();
         refresh_timer_->stop();
+        switch (settings_->GetTaskDifficulty()) {
+            case TaskDifficulty::Easy:
+                settings_->AddScore(100);
+                break;
+            case TaskDifficulty::Medium:
+                settings_->AddScore(200);
+                break;
+            case TaskDifficulty::Hard:
+                settings_->AddScore(300);
+                break;
+            default:;
+        }
+        for (const auto& id : task_ids_) {
+            settings_->MarkTaskDone(
+                static_cast<int>(exercise_type_), static_cast<int>(settings_->GetTaskDifficulty()),
+                QString::number(id));
+        }
         emit ExerciseChanged(static_cast<int>(ExerciseType::Chill));
         return;
     }
     if (exercise_type_ == ExerciseType::Grammar) {
-        grammar_view_->SetTask(settings_->GetTaskDifficulty(), task_ids_.back());
+        grammar_view_->SetTask(settings_->GetTaskDifficulty(), task_ids_[task_id_ind_]);
     } else {
-        translation_view_->SetTask(settings_->GetTaskDifficulty(), task_ids_.back());
+        translation_view_->SetTask(settings_->GetTaskDifficulty(), task_ids_[task_id_ind_]);
     }
 }

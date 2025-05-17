@@ -1,5 +1,10 @@
 ### Duolingo
 
+### Запуск
+```bash
+bazel run duolingo
+```
+
 ### Звуки
 + Lofi для чилла
 + Правильный ответ

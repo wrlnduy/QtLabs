@@ -16,8 +16,8 @@ TranslationView::TranslationView(QWidget* parent)
     auto* layout = new QVBoxLayout(this);
     layout->addWidget(question_label_);
     layout->addWidget(input_field_);
-    layout->addWidget(submit_button_);
     layout->addStretch();
+    layout->addWidget(submit_button_);
 
     connect(submit_button_, &QPushButton::clicked, this, &TranslationView::Submit);
     connect(input_field_, &QLineEdit::returnPressed, this, &TranslationView::Submit);

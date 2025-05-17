@@ -46,6 +46,7 @@ class TaskView : public QWidget {
 
     ExerciseType exercise_type_;
     std::vector<int> task_ids_{};
+    int task_id_ind_{};
 
     std::shared_ptr<Settings> settings_{};
 
