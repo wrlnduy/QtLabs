@@ -10,7 +10,15 @@ AudioPlayer::AudioPlayer() : player_(new QMediaPlayer(this)), output_(new QAudio
     player_->setAudioOutput(output_);
 }
 
-void AudioPlayer::PlaySound(const Sound::Type& sound) const {
+void AudioPlayer::PlaySound(const Sound::Type& sound) {
     player_->setSource(Sound::GetSoundUrl(sound));
+    sound_ = sound;
+    connect(
+        player_, &QMediaPlayer::mediaStatusChanged, this, [this](QMediaPlayer::MediaStatus status) {
+            if (sound_ == Sound::Chill && status == QMediaPlayer::EndOfMedia) {
+                player_->setPosition(0);
+                player_->play();
+            }
+        });
     player_->play();
 }

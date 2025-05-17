@@ -16,6 +16,6 @@ QUrl Sound::GetSoundUrl(const Type& type) {
             break;
         default:;
     }
-    path += ".mp3";
+    path += ".wav";
     return QUrl::fromLocalFile(path);
 }

@@ -12,11 +12,12 @@ class AudioPlayer : public QObject {
    public:
     AudioPlayer();
 
-    void PlaySound(const Sound::Type&) const;
+    void PlaySound(const Sound::Type&);
 
    private:
     QMediaPlayer* player_ = nullptr;
     QAudioOutput* output_ = nullptr;
+    Sound::Type sound_ = Sound::Chill;
 };
 
 #endif  // AUDIOPLAYER_H
