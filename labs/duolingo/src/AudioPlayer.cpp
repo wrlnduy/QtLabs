@@ -22,3 +22,8 @@ void AudioPlayer::PlaySound(const Sound::Type& sound) {
         });
     player_->play();
 }
+
+void AudioPlayer::Shutdown() const {
+    player_->stop();
+    player_->setSource({});
+}

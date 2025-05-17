@@ -13,11 +13,19 @@ class Settings : public QObject {
     void SetTaskDifficulty(const TaskDifficulty&);
     [[nodiscard]] TaskDifficulty GetTaskDifficulty() const;
 
-    void SetExerciseType(const ExerciseType&);
-    [[nodiscard]] ExerciseType GetExerciseType() const;
+    void SetScore(const int&);
+    [[nodiscard]] int GetScore() const;
+    void AddScore(const int&);
+
+    void MarkTaskDone(const int& type, const int& diff, const QString& id);
+    [[nodiscard]] QStringList GetDoneTasks(const int& type, const int& diff) const;
+    void ClearDoneTasks();
+
+    [[nodiscard]]std::vector<int> GetUnusedTasks(int type, int diff) const;
 
    signals:
-    void DifficultyChanged(TaskDifficulty difficulty) const;
+    void DifficultyChanged(TaskDifficulty difficulty);
+    void ScoreChanged(int score);
 
    private:
     QSettings settings_{};

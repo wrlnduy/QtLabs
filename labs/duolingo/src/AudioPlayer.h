@@ -14,6 +14,8 @@ class AudioPlayer : public QObject {
 
     void PlaySound(const Sound::Type&);
 
+    void Shutdown() const;
+
    private:
     QMediaPlayer* player_ = nullptr;
     QAudioOutput* output_ = nullptr;
